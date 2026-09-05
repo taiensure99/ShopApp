@@ -15,6 +15,7 @@ namespace ShopApp.Controllers
             new SanPham { Id = 1, Ten = "Áo thun nam basic", GiaBan = 250000, TonKho = 15, DanhMuc = "Áo" },
             new SanPham { Id = 2, Ten = "Quần jean slim fit", GiaBan = 450000, TonKho = 10, DanhMuc = "Quần" },
             new SanPham { Id = 3, Ten = "Giày sneaker trắng", GiaBan = 800000, TonKho = 5,  DanhMuc = "Giày" },
+            new SanPham { Id = 4, Ten = "Áo khoác gió nam", GiaBan = 600000, TonKho = 8, DanhMuc = "Áo" },
         };
 
         // GET: api/SanPham
