@@ -13,9 +13,10 @@ namespace ShopApp.Models
         [Range(0, double.MaxValue, ErrorMessage = "Giá phải >= 0")]
         public double GiaBan { get; set; }
 
-        [Range(0, int.MaxValue)]
+        [Range(0, int.MaxValue, ErrorMessage = "tồn kho phải >= 0")]
         public int TonKho { get; set; }
 
+        [Required(ErrorMessage = "danh muc ko dc để trống")]
         public string DanhMuc { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;

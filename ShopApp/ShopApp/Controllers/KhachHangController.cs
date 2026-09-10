@@ -43,5 +43,55 @@ namespace ShopApp.Controllers
 
             return Ok(kh);
         }
+
+        [HttpPost]
+        public IActionResult Create([FromBody] Models.KhachHang khachHang)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            // Tạo Id mới
+            int newId = _danhSach.Max(k => k.Id) + 1;
+            khachHang.Id = newId;
+            _danhSach.Add(khachHang);
+            return CreatedAtAction(nameof(Get), new { id = khachHang.Id }, khachHang);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, [FromBody] Models.KhachHang khachHang)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var existingKhachHang = _danhSach.FirstOrDefault(k => k.Id == id);
+            if (existingKhachHang == null)
+            {
+                return NotFound($"Không tìm thấy khách hàng Id={id}");
+            }
+            // Cập nhật thông tin khách hàng
+            existingKhachHang.HoTen = khachHang.HoTen;
+            existingKhachHang.Email = khachHang.Email;
+            existingKhachHang.SDT = khachHang.SDT;
+            existingKhachHang.DiaChi = khachHang.DiaChi;
+            return NoContent();
+        }
+
+        [HttpDelete("delete/{id}")]
+        public IActionResult Delete(int id)
+        {
+            var existingKhachHang = _danhSach.FirstOrDefault(k => k.Id == id);
+            if (existingKhachHang == null)
+            {
+                return NotFound($"Không tìm thấy khách hàng Id={id}");
+            }
+            _danhSach.Remove(existingKhachHang);
+            return Ok($"Đã xóa khách hàng Id={id}");
+        }
+
+                
+
+
     }
 }

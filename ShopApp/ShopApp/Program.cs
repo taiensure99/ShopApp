@@ -10,6 +10,12 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // Tắt tính năng tự động trả về 400 khi Model không hợp lệ
+        options.SuppressModelStateInvalidFilter = true;
+    });
 
 // Đăng ký các dịch vụ (Services) — học buổi 32
 builder.Services.AddControllers();

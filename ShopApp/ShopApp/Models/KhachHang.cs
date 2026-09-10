@@ -13,8 +13,12 @@ namespace ShopApp.Models
         [EmailAddress(ErrorMessage = "Email không hợp lệ")]
         public string Email { get; set; } = string.Empty;
 
-        public string? SDT { get; set; }
+        [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
+        [StringLength(100, MinimumLength = 2)]
+        public string SDT { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Địa chỉ không được để trống")]
         public string? DiaChi { get; set; }
     }
+
 }

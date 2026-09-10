@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ShopApp.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace ShopApp.Controllers
 {
@@ -146,8 +147,76 @@ namespace ShopApp.Controllers
             return Ok($"Đã xóa sản phẩm Id={id}");
         }
 
+        [HttpPatch("{id}/gia")]
+        public IActionResult CapNhatGia(int id, [FromBody] CapNhatGiaRequest req) 
+        {
+            var sanPham = _danhSach.FirstOrDefault(s => s.Id == id);
+            if (sanPham == null)
+            {
+                return NotFound(new { message = $"Không tìm thấy sản phẩm có ID = {id}" });
+            }
+
+            if (req.GiaBanMoi < 0)
+            {
+                return BadRequest(new { message = "Giá sản phẩm không được nhỏ hơn 0." });
+            }
+
+            sanPham.GiaBan = req.GiaBanMoi;
+
+            return Ok(new
+            {
+                message = "Cập nhật giá thành công!",
+                data = sanPham
+            });
+        }
+        [HttpPost("nhieu")]
+        public IActionResult CreateNhieu([FromBody] List<SanPham> danhSachMoi)
+        {
+            // 1. Tạo 2 danh sách để phân loại kết quả
+            var thanhCong = new List<SanPham>();
+            var thatBai = new List<object>(); // Dùng object ẩn danh để linh hoạt chứa lỗi
+
+            foreach (var sp in danhSachMoi)
+            {
+                // 2. Khởi tạo bộ kiểm tra (ValidationContext) cho từng sản phẩm
+                var validationContext = new ValidationContext(sp);
+                var validationResults = new List<ValidationResult>();
+
+                // Hàm này sẽ kiểm tra sp dựa trên các Data Annotations ([Required], [Range]...)
+                bool isValid = Validator.TryValidateObject(sp, validationContext, validationResults, true);
+
+                if (isValid)
+                {
+                    // 3. Nếu HỢP LỆ -> Tạo ID mới và thêm vào Database/List
+                    int newId = _danhSach.Any() ? _danhSach.Max(s => s.Id) + 1 : 1;
+                    sp.Id = newId;
+                    _danhSach.Add(sp);
+
+                    thanhCong.Add(sp);
+                }
+                else
+                {
+                    // 4. Nếu KHÔNG HỢP LỆ -> Gom các thông báo lỗi lại
+                    var errors = validationResults.Select(r => r.ErrorMessage).ToList();
+                    thatBai.Add(new
+                    {
+                        SanPhamLoi = sp,
+                        LyDo = errors
+                    });
+                }
+            }
+
+            // 5. Trả về kết quả tổng hợp (Dùng Status 200 OK hoặc 207 Multi-Status)
+            return Ok(new
+            {
+                ThongBao = $"Xử lý hoàn tất. Thêm thành công: {thanhCong.Count}, Lỗi: {thatBai.Count}",
+                DanhSachThanhCong = thanhCong,
+                DanhSachLoi = thatBai
+            });
+        }   
 
     }
+
 
     // Học viên tự thêm POST/PUT/DELETE ở bài tập buổi 31
 }

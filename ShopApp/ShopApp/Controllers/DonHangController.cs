@@ -33,24 +33,35 @@ namespace ShopApp.Controllers
             {
                 return NotFound(new { message = $"Không tìm thấy đơn hàng với Id = {id}" });
             }
+            if (donHang.TongTien <= 0)
+            {
+                return BadRequest("Tổng tiền phải lớn hơn 0");
+
+            }
+
 
             return Ok(donHang);
         }
         [HttpGet("theo-trangthai/{trangThai}")]
         public IActionResult GetByTrangThai(string trangThai)
         {
-            var ketQua = _donHangs
-                .Where(d => d.TrangThai.Equals(trangThai, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            if (!ketQua.Any())
+            if (trangThai is not ("cho_xac_nhan" or "da_giao" or "da_huy"))
             {
-                return NotFound(new { message = $"Không có đơn hàng nào ở trạng thái: {trangThai}" });
+                return BadRequest(new { message = "Trạng thái không hợp lệ. Vui lòng nhập: cho_xac_nhan, da_giao, hoặc da_huy" });
             }
+            var ketQua = _donHangs
+                    .Where(d => d.TrangThai.Equals(trangThai, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
 
-            return Ok(ketQua);
+                if (!ketQua.Any())
+                {
+                    return NotFound(new { message = $"Không có đơn hàng nào ở trạng thái: {trangThai}" });
+
+                }
+                return Ok(ketQua);
         }
 
+        
         [HttpGet("{nam:int}/{thang:int}")]
         public IActionResult GetByNamThang(int nam, int thang)
         {
