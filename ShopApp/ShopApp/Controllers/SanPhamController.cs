@@ -99,6 +99,53 @@ namespace ShopApp.Controllers
             return Ok(KetQua);
         }
 
+        [HttpPost]
+        public IActionResult Create([FromBody] SanPham sanPham)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            // Tạo Id mới
+            int newId = _danhSach.Max(s => s.Id) + 1;
+            sanPham.Id = newId;
+            _danhSach.Add(sanPham);
+            return CreatedAtAction(nameof(GetById), new { id = sanPham.Id }, sanPham);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, [FromBody] SanPham sanPham)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var existingSanPham = _danhSach.FirstOrDefault(s => s.Id == id);
+            if (existingSanPham == null)
+            {
+                return NotFound($"Không tìm thấy sản phẩm Id={id}");
+            }
+            // Cập nhật thông tin sản phẩm
+            existingSanPham.Ten = sanPham.Ten;
+            existingSanPham.GiaBan = sanPham.GiaBan;
+            existingSanPham.TonKho = sanPham.TonKho;
+            existingSanPham.DanhMuc = sanPham.DanhMuc;
+            existingSanPham.IsActive = sanPham.IsActive;
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var existingSanPham = _danhSach.FirstOrDefault(s => s.Id == id);
+            if (existingSanPham == null)
+            {
+                return NotFound($"Không tìm thấy sản phẩm Id={id}");
+            }
+            _danhSach.Remove(existingSanPham);
+            return Ok($"Đã xóa sản phẩm Id={id}");
+        }
+
 
     }
 
