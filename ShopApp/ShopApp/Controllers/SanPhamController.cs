@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ShopApp.Interfaces;
 using ShopApp.Models;
 using System.ComponentModel.DataAnnotations;
 
@@ -18,6 +19,13 @@ namespace ShopApp.Controllers
             new SanPham { Id = 3, Ten = "Giày sneaker trắng", GiaBan = 800000, TonKho = 5,  DanhMuc = "Giày" },
             new SanPham { Id = 4, Ten = "Mũ lưỡi trai", GiaBan = 150000, TonKho = 20, DanhMuc = "Phụ kiện" }
         };
+
+        private readonly ISanPhamService _sanPhamService;
+
+        public SanPhamController(ISanPhamService sanPhamService)
+        {
+            _sanPhamService = sanPhamService;
+        }
 
         // GET: api/SanPham
         [HttpGet]

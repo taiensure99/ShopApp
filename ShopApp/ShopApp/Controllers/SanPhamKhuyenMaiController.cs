@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ShopApp.Interfaces;
 using ShopApp.Models;
 
 namespace ShopApp.Controllers
@@ -16,6 +17,13 @@ namespace ShopApp.Controllers
             new SanPhamKhuyenMai { Id = 4, SanPhamId = 4, PhanTramGiam = 25, NgayBatDau = new DateTime(2023, 8, 1), NgayKetThuc = new DateTime(2027, 8, 31) },
             new SanPhamKhuyenMai { Id = 5, SanPhamId = 1, PhanTramGiam = 30, NgayBatDau = new DateTime(2023, 9, 1), NgayKetThuc = new DateTime(2026, 9, 30) }
         };
+
+        private readonly ISanPhamService _sanPhamService;
+
+        public SanPhamKhuyenMaiController(ISanPhamService sanPhamService)
+        {
+            _sanPhamService = sanPhamService;
+        }
 
         [HttpGet]
         public IActionResult GetAll()
@@ -40,11 +48,17 @@ namespace ShopApp.Controllers
         }
 
         [HttpGet("{SanPhamId:int}")]
-        public IActionResult GetBySanPhamId(int SanPhamId)
+        public async Task<IActionResult> GetBySanPhamId(int SanPhamId)
         {
-            var spkm = _danhSach.Where(x => x.SanPhamId == SanPhamId).ToList();
-            if (!spkm.Any())
+            bool checkSanPham = await _sanPhamService.KiemTraTonTai(SanPhamId);
+            if (!checkSanPham) //tuowng tu nhu == false
+            {
                 return NotFound($"Không tìm thấy sản phẩm khuyến mãi cho sản phẩm Id={SanPhamId}");
+            }
+              
+            var spkm = _danhSach.Where(x => x.SanPhamId == SanPhamId).ToList();
+            //if (!spkm.Any())
+            //    return NotFound($"Không tìm thấy sản phẩm khuyến mãi cho sản phẩm Id={SanPhamId}");
             return Ok(spkm);
         }
 
