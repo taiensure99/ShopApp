@@ -56,8 +56,63 @@ namespace ShopApp.Controllers
                 return NotFound($"Không tìm thấy sản phẩm khuyến mãi với phần trăm giảm {PhanTramGiam}%");
             return Ok(spkm);
         }
+        [HttpPost("Khuyen-Mai")]
+        public IActionResult CreateKhuyenMai([FromBody] SanPhamKhuyenMai spkm)
+        {
+            if (spkm.NgayKetThuc <= spkm.NgayBatDau)
+            {
+                ModelState.AddModelError("NgayKetThuc", "Ngày kết thúc bắt buộc phải sau Ngày bắt đầu.");
+                return BadRequest(ModelState);
+            }
+
+            bool sanPhamTonTai = _danhSach.Any(sp => sp.Id == spkm.SanPhamId);
+            if (!sanPhamTonTai)
+            {
+                return BadRequest(new { message = $"Sản phẩm với Id = {spkm.SanPhamId} không tồn tại trong hệ thống." });
+            }
 
 
-            
+            int newId = _danhSach.Any() ? _danhSach.Max(s => s.Id) + 1 : 1;
+            spkm.Id = newId;
+            _danhSach.Add(spkm);
+            return Ok(spkm);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdateKhuyenMai(int id, [FromBody] SanPhamKhuyenMai req)
+        {
+            var kmCu = _danhSach.FirstOrDefault(x => x.Id == id);
+            if (kmCu == null)
+            {
+                return NotFound(new { message = "Không tìm thấy khuyến mãi." });
+            }
+
+            if (req.SanPhamId != kmCu.SanPhamId)
+            {
+                return BadRequest(new { message = "Không được đổi sản phẩm áp dụng khuyến mãi" });
+            }
+
+            kmCu.PhanTramGiam = req.PhanTramGiam;
+            kmCu.NgayKetThuc = req.NgayKetThuc;
+            return Ok(kmCu);
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteKhuyenMai(int id, [FromBody] SanPhamKhuyenMai red)
+        {
+            var kmcu = _danhSach.FirstOrDefault(X => X.Id == id);
+
+            if (kmcu == null)
+            {
+                return NotFound(new { message = "Khong tim thay" });
+            }
+            if (kmcu.NgayBatDau <= DateTime.Now)
+            {
+                return BadRequest(new { message = "Không thể xóa khuyến mãi đã/đang áp dụng" });
+            }
+
+            _danhSach.Remove(kmcu);
+            return Ok(new { message = "Đã xóa thành công khuyến mãi." });
+        }
     }
 }
