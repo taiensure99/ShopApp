@@ -21,10 +21,12 @@ namespace ShopApp.Controllers
         };
 
         private readonly ISanPhamService _sanPhamService;
+        private readonly IThongKeService _thongKeService;
 
-        public SanPhamController(ISanPhamService sanPhamService)
+        public SanPhamController(ISanPhamService sanPhamService, IThongKeService thongKeService)
         {
             _sanPhamService = sanPhamService;
+            _thongKeService = thongKeService;
         }
 
         // GET: api/SanPham
@@ -221,7 +223,19 @@ namespace ShopApp.Controllers
                 DanhSachThanhCong = thanhCong,
                 DanhSachLoi = thatBai
             });
-        }   
+        }
+        [HttpGet("thong-ke")]
+        public IActionResult ThongKe()
+        {
+            var tongSanPham = _thongKeService.DenTongSanPham();
+            var sanPhamHetHang = _thongKeService.DenSanPhamHetHang();
+
+            return Ok(new
+            {
+                TongSoSanPham = tongSanPham,
+                SanPhamHetHang = sanPhamHetHang
+            });
+        }
 
     }
 

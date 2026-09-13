@@ -1,5 +1,6 @@
 ﻿using ShopApp.Interfaces;
 using ShopApp.Services;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,14 +23,43 @@ builder.Services.AddControllers()
 
 //Đăng ký service =< để controller sử dụng nè
 builder.Services.AddScoped<ISanPhamService, SanPhamService>();
+builder.Services.AddScoped<IThongKeService, ThongKeService>();
+builder.Services.AddTransient<IGuidService, GuidServiceTransient>();
+builder.Services.AddScoped<IGuidService, GuidServiceScoped>();
+builder.Services.AddSingleton<IGuidService, GuidServiceSingleton>();
+builder.Services.AddScoped<IRateLimitService, RateLimitService>();
+
 
 // Đăng ký các dịch vụ (Services) — học buổi 32
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 var app = builder.Build();
 
+app.Use(async (context, next) =>
+{
+    var rateLimitService =
+        context.RequestServices.GetRequiredService<IRateLimitService>();
+
+    var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+    if (rateLimitService.KiemTraVuotGioiHan(ip))
+    {
+        context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+
+        await context.Response.WriteAsync(
+            "Bạn đã vượt quá giới hạn request. Vui lòng thử lại sau."
+        );
+
+        return; // Không cho request chạy tiếp
+    }
+
+    rateLimitService.GhiNhanRequest(ip);
+
+    await next(); // Cho request chạy tiếp
+});
 
 
 // Middleware Pipeline — học buổi 32-33
@@ -49,6 +79,24 @@ app.Use(async (context, next) =>
     // Log thông tin response
     Console.WriteLine($"Response: {context.Response.StatusCode}");
 });
+
+
+app.Use(async (context, next) =>
+{
+    var stopwatch = Stopwatch.StartNew();
+    var thoiGianGoi = DateTime.Now;
+    var httpMethod = context.Request.Method;
+
+    await next();
+
+    stopwatch.Stop();
+
+    var Status = context.Response.StatusCode;
+    Console.WriteLine($"{thoiGianGoi:dd/MM/yyyy HH:mm:ss} Method: {httpMethod} Status: {Status} {stopwatch.ElapsedMilliseconds}ms");
+});
+
+
+
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
