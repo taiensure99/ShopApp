@@ -19,5 +19,10 @@ namespace ShopApp.Services
             bool tonTai =  _danhSach.Any(sp => sp.Id == id);
             return tonTai;
         }
+        public SanPham GetById(int id)
+        {
+
+            return _danhSach.FirstOrDefault(sp => sp.Id == id);
+        }
     }
 }

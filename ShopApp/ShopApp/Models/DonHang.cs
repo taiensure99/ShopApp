@@ -2,8 +2,6 @@
 
 namespace ShopApp.Models
 {
-    namespace MyApp.Models
-    {
         public class DonHang
         {
             public int Id { get; set; }
@@ -13,5 +11,4 @@ namespace ShopApp.Models
 
             public DateTime NgayDat { get; set; }
         }
-    }
 }

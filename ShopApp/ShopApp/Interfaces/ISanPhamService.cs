@@ -1,7 +1,10 @@
-﻿namespace ShopApp.Interfaces
+﻿using ShopApp.Models;
+namespace ShopApp.Interfaces
+
 {
     public interface ISanPhamService
     {
-        Task<bool> KiemTraTonTai(int id); //ddang chay async awai
+        Task<bool> KiemTraTonTai(int id);
+        SanPham GetById(int id);
     }
 }

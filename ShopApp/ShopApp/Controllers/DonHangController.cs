@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ShopApp.Models;
-using ShopApp.Models.MyApp.Models;
-
 namespace ShopApp.Controllers
 {
     [Route("api/[controller]")]
@@ -71,6 +69,80 @@ namespace ShopApp.Controllers
                 return NotFound(new { message = $"Không có đơn hàng nào trong tháng {thang} năm {nam}" });
             }
             return Ok(ketQua);
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var donHang = _donHangs.FirstOrDefault(d => d.Id == id);
+            if (donHang == null)
+            {
+                return NotFound(new { message = $"Không tìm thấy đơn hàng với Id = {id}" });
+            }
+            _donHangs.Remove(donHang);
+            return Ok(new { message = $"Đã xóa đơn hàng với Id = {id}" });
+        }
+
+        [HttpPost]
+        public IActionResult Create([FromBody] Models.DonHang donHang)
+        {
+            if (donHang == null)
+            {
+                return BadRequest("Dữ liệu đơn hàng không được để trống.");
+            }
+
+            if (donHang.TongTien <= 0)
+            {
+                ModelState.AddModelError("TongTien", "Tổng tiền phải lớn hơn 0.");
+            }
+
+            if (string.IsNullOrWhiteSpace(donHang.TrangThai))
+            {
+                ModelState.AddModelError("TrangThai", "Trạng thái không được để trống.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            int newId = _donHangs.Any() ? _donHangs.Max(d => d.Id) + 1 : 1;
+            donHang.Id = newId;
+
+            _donHangs.Add(donHang);
+
+            return CreatedAtAction(nameof(GetById), new { id = donHang.Id }, donHang);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, [FromBody] Models.DonHang donHang)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var existingDonHang = _donHangs.FirstOrDefault(d => d.Id == id);
+            if (existingDonHang == null)
+            {
+                return NotFound(new { message = $"Không tìm thấy đơn hàng với Id = {id}" });
+            }
+            // Cập nhật thông tin đơn hàng
+            existingDonHang.MaDon = donHang.MaDon;
+            existingDonHang.TongTien = donHang.TongTien;
+            existingDonHang.TrangThai = donHang.TrangThai;
+            existingDonHang.NgayDat = donHang.NgayDat;
+            return NoContent();
+        }
+
+        [HttpGet("dem/{trangThai}")]
+        public IActionResult DemDonHangTheoTrangThai(string trangThai)
+        {
+            int soLuong = _donHangs.Count(d => d.TrangThai.Equals(trangThai, StringComparison.OrdinalIgnoreCase));
+            return Ok(new
+            {
+                TrangThai = trangThai,
+                SoLuong = soLuong
+            });
         }
 
     };

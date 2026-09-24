@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ShopApp.Interfaces;
+using ShopApp.Models;
+using ShopApp.Services;
 using System.Runtime.CompilerServices;
+
 
 namespace ShopApp.Controllers
 {
@@ -8,6 +12,12 @@ namespace ShopApp.Controllers
     [ApiController]
     public class KhachHangController : ControllerBase
     {
+        private readonly IKhachHangService _khachHangService;
+
+        public KhachHangController(IKhachHangService khachHangService)
+        {
+            _khachHangService = khachHangService;
+        }
         private static List<Models.KhachHang> _danhSach = new List<Models.KhachHang>
         {
             new Models.KhachHang { Id = 1, HoTen = "Nguyen Van A", Email = "nguyenvana@email.com" },
@@ -45,17 +55,15 @@ namespace ShopApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] Models.KhachHang khachHang)
+        public IActionResult Create([FromBody] KhachHang khachHang)
         {
-            if (!ModelState.IsValid)
+            if (_khachHangService.KiemTraEmailTonTai(khachHang.Email))
             {
-                return BadRequest(ModelState);
+                return BadRequest(new { message = "Email này đã được sử dụng." });
             }
-            // Tạo Id mới
-            int newId = _danhSach.Max(k => k.Id) + 1;
-            khachHang.Id = newId;
-            _danhSach.Add(khachHang);
-            return CreatedAtAction(nameof(Get), new { id = khachHang.Id }, khachHang);
+
+            _khachHangService.ThemKhachHang(khachHang);
+            return Ok(new { message = "Tạo thành công", data = khachHang });
         }
 
         [HttpPut("{id}")]
@@ -90,8 +98,15 @@ namespace ShopApp.Controllers
             return Ok($"Đã xóa khách hàng Id={id}");
         }
 
-                
+        [HttpGet("theo-email/{email}")]
 
+        public IActionResult GetByEmail(string email)
+        {
+            var kh = _danhSach.FirstOrDefault(x => x.Email.ToLower() == email.ToLower());
+            if (kh == null)
+                return NotFound($"Không tìm thấy khách hàng có email '{email}'");
+            return Ok(kh);
+        }
 
     }
 }
