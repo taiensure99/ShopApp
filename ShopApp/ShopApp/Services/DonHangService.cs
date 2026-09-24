@@ -13,6 +13,12 @@ namespace ShopApp.Services
             new DonHang { Id = 4, MaDon = "DH004", TongTien = 890000, TrangThai = "Đã giao" , NgayDat = new DateTime(2025, 9, 5) },
             new DonHang { Id = 5, MaDon = "DH005", TongTien = 300000, TrangThai = "Chờ xử lý", NgayDat =  new DateTime(2026, 9, 5)}
         };
+
+        public DonHang DatHang(DatHangRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
         public int DemDonHangTheoTrangThai(string trangThai)
         {
             if (string.IsNullOrWhiteSpace(trangThai))
@@ -22,6 +28,16 @@ namespace ShopApp.Services
 
             return _donHangs.Count(d => d.TrangThai != null &&
                                         d.TrangThai.Trim().Equals(trangThai.Trim(), StringComparison.OrdinalIgnoreCase));
+        }
+
+        public int ThemDonHang(DonHang donHang)
+        {
+            throw new NotImplementedException();
+        }
+
+        DonHang IDonHangService.ThemDonHang(DonHang donHang)
+        {
+            throw new NotImplementedException();
         }
     }
 }

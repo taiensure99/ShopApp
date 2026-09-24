@@ -29,6 +29,7 @@ builder.Services.AddScoped<IGuidService, GuidServiceScoped>();
 builder.Services.AddSingleton<IGuidService, GuidServiceSingleton>();
 builder.Services.AddScoped<IRateLimitService, RateLimitService>();
 builder.Services.AddScoped<IDonHangService, DonHangService>();
+builder.Services.AddScoped<IDatHangService, DatHangService>();
 // Đăng ký các dịch vụ (Services) — học buổi 32
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -37,6 +38,7 @@ builder.Services.AddScoped<IKhachHangService, KhachHangService>();
 builder.Services.AddScoped<ISanPhamKhuyenMaiService, SanPhamKhuyenMaiService>();
 builder.Services.AddScoped<IThongBaoService, ThongBaoConsoleService>();
 builder.Services.AddScoped<IThongBaoService, ThongBaoLogService>();
+
 
 
 var app = builder.Build();

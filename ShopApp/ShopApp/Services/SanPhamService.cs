@@ -6,7 +6,7 @@ namespace ShopApp.Services
     public class SanPhamService : ISanPhamService
     {
 
-        private static List<SanPham> _danhSach = new List<SanPham>
+        private List<SanPham> _danhSach = new List<SanPham>
         {
             new SanPham { Id = 1, Ten = "Áo thun nam basic", GiaBan = 250000, TonKho = 15, DanhMuc = "Áo" },
             new SanPham { Id = 2, Ten = "Quần jean slim fit", GiaBan = 450000, TonKho = 10, DanhMuc = "ao" },
@@ -24,5 +24,16 @@ namespace ShopApp.Services
 
             return _danhSach.FirstOrDefault(sp => sp.Id == id);
         }
+
+        public async Task<decimal> TinhTongTien(int sanPhamId, int soLuong)
+        {
+            var sanPham = GetById(sanPhamId);
+            if (sanPham == null)
+            {
+                throw new ArgumentException($"Sản phẩm với Id {sanPhamId} không tồn tại.");
+            }
+            return decimal.Multiply((decimal)sanPham.GiaBan, soLuong);
+        }
+
     }
 }

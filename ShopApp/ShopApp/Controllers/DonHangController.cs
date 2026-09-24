@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ShopApp.Interfaces;
 using ShopApp.Models;
+using ShopApp.Services;
 namespace ShopApp.Controllers
+
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -86,31 +89,19 @@ namespace ShopApp.Controllers
         [HttpPost]
         public IActionResult Create([FromBody] Models.DonHang donHang)
         {
-            if (donHang == null)
+            if (donHang == null) return BadRequest("Dữ liệu không được để trống.");
+            if (donHang.TongTien <= 0) ModelState.AddModelError("TongTien", "Tổng tiền phải lớn hơn 0.");
+            if (string.IsNullOrWhiteSpace(donHang.TrangThai)) ModelState.AddModelError("TrangThai", "Trạng thái không được để trống.");
+
+            else if (donHang.TrangThai is not ("cho_xac_nhan" or "da_giao" or "da_huy"))
             {
-                return BadRequest("Dữ liệu đơn hàng không được để trống.");
+                ModelState.AddModelError("TrangThai", "Trạng thái không hợp lệ (chỉ nhận: cho_xac_nhan, da_giao, da_huy).");
             }
 
-            if (donHang.TongTien <= 0)
-            {
-                ModelState.AddModelError("TongTien", "Tổng tiền phải lớn hơn 0.");
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            if (string.IsNullOrWhiteSpace(donHang.TrangThai))
-            {
-                ModelState.AddModelError("TrangThai", "Trạng thái không được để trống.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            int newId = _donHangs.Any() ? _donHangs.Max(d => d.Id) + 1 : 1;
-            donHang.Id = newId;
-
+            donHang.Id = _donHangs.Any() ? _donHangs.Max(d => d.Id) + 1 : 1;
             _donHangs.Add(donHang);
-
             return CreatedAtAction(nameof(GetById), new { id = donHang.Id }, donHang);
         }
 
@@ -126,7 +117,6 @@ namespace ShopApp.Controllers
             {
                 return NotFound(new { message = $"Không tìm thấy đơn hàng với Id = {id}" });
             }
-            // Cập nhật thông tin đơn hàng
             existingDonHang.MaDon = donHang.MaDon;
             existingDonHang.TongTien = donHang.TongTien;
             existingDonHang.TrangThai = donHang.TrangThai;
@@ -138,11 +128,7 @@ namespace ShopApp.Controllers
         public IActionResult DemDonHangTheoTrangThai(string trangThai)
         {
             int soLuong = _donHangs.Count(d => d.TrangThai.Equals(trangThai, StringComparison.OrdinalIgnoreCase));
-            return Ok(new
-            {
-                TrangThai = trangThai,
-                SoLuong = soLuong
-            });
+            return Ok(new { TrangThai = trangThai, SoLuong = soLuong });
         }
 
     };
