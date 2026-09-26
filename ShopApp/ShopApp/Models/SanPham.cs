@@ -1,24 +1,23 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
 
-namespace ShopApp.Models
+namespace ShopApp.Models;
+
+public partial class SanPham
 {
-    public class SanPham
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        [Required(ErrorMessage = "Tên sản phẩm không được để trống")]
-        [StringLength(200, MinimumLength = 3)]
-        public string Ten { get; set; } = string.Empty;
+    public string Ten { get; set; } = null!;
 
-        [Range(0, double.MaxValue, ErrorMessage = "Giá phải >= 0")]
-        public double GiaBan { get; set; }
+    public decimal GiaBan { get; set; }
 
-        [Range(0, int.MaxValue, ErrorMessage = "tồn kho phải >= 0")]
-        public int TonKho { get; set; }
+    public int TonKho { get; set; }
 
-        [Required(ErrorMessage = "danh muc ko dc để trống")]
-        public string DanhMuc { get; set; } = string.Empty;
+    public string DanhMuc { get; set; } = null!;
 
-        public bool IsActive { get; set; } = true;
-    }
+    public bool IsActive { get; set; }
+
+    public virtual ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; } = new List<ChiTietDonHang>();
+
+    public virtual ICollection<DanhGiaSanPham> DanhGiaSanPhams { get; set; } = new List<DanhGiaSanPham>();
 }

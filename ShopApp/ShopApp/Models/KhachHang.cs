@@ -1,24 +1,25 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
 
-namespace ShopApp.Models
+namespace ShopApp.Models;
+
+public partial class KhachHang
 {
-    public class KhachHang
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        [Required(ErrorMessage = "Họ tên không được để trống")]
-        public string HoTen { get; set; } = string.Empty;
+    public string HoTen { get; set; } = null!;
 
-        [Required]
-        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
-        public string Email { get; set; } = string.Empty;
+    public string Email { get; set; } = null!;
 
-        [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
-        [StringLength(100, MinimumLength = 2)]
-        public string SDT { get; set; } = string.Empty;
+    public string? Sdt { get; set; }
 
-        [Required(ErrorMessage = "Địa chỉ không được để trống")]
-        public string? DiaChi { get; set; }
-    }
+    public string? DiaChi { get; set; }
 
+    public DateTime NgayDangKy { get; set; }
+
+    public virtual ICollection<DanhGiaSanPham> DanhGiaSanPhams { get; set; } = new List<DanhGiaSanPham>();
+
+    public virtual ICollection<DonHang> DonHangs { get; set; } = new List<DonHang>();
+
+    public virtual ICollection<PhienDangNhap> PhienDangNhaps { get; set; } = new List<PhienDangNhap>();
 }

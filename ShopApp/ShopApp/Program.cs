@@ -1,8 +1,19 @@
 ﻿using ShopApp.Interfaces;
 using ShopApp.Services;
 using System.Diagnostics;
-
+using Microsoft.EntityFrameworkCore;
+using ShopApp.Models;
 var builder = WebApplication.CreateBuilder(args);
+
+
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<ShopAppDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+
+
 
 builder.Services.AddCors(options =>
 {
