@@ -57,7 +57,7 @@ namespace ShopApp.Controllers
             }
             if (giaToiDa.HasValue)
             {
-                ketQua = ketQua.Where(x => x.GiaBan <= giaToiDa.Value);
+                ketQua = ketQua.Where(x => x.GiaBan <= (decimal)giaToiDa.Value);
             }
             return Ok(ketQua);
         }
@@ -171,7 +171,7 @@ namespace ShopApp.Controllers
                 return BadRequest(new { message = "Giá sản phẩm không được nhỏ hơn 0." });
             }
 
-            sanPham.GiaBan = req.GiaBanMoi;
+            sanPham.GiaBan = (decimal)req.GiaBanMoi;
 
             return Ok(new
             {

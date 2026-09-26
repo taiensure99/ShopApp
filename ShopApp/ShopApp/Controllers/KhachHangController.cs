@@ -81,7 +81,6 @@ namespace ShopApp.Controllers
             // Cập nhật thông tin khách hàng
             existingKhachHang.HoTen = khachHang.HoTen;
             existingKhachHang.Email = khachHang.Email;
-            existingKhachHang.SDT = khachHang.SDT;
             existingKhachHang.DiaChi = khachHang.DiaChi;
             return NoContent();
         }

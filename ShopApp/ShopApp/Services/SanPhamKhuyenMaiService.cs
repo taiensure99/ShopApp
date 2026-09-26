@@ -15,7 +15,7 @@ namespace ShopApp.Services
         {
             var sp = _sanPhamService.GetById(sanPhamId);
             if (sp == null) return 0;
-            return sp.GiaBan * (1 - phanTramGiam / 100);
+            return (double)sp.GiaBan * (1 - phanTramGiam / 100);
         }
     }
 }

@@ -29,7 +29,7 @@ namespace ShopApp.Services
             var DonHangMoi = new DonHang
             {
                 MaDon = Guid.NewGuid().ToString(),
-                TongTien = (double)TongTien,
+                TongTien =TongTien,
                 TrangThai = "cho_xac_nhan",
                 NgayDat = DateTime.Now
             };
