@@ -11,9 +11,9 @@ namespace ShopApp.Services
             _sanPhamService = sanPhamService;
         }
 
-        public double TinhGiaSauKhuyenMai(int sanPhamId, double phanTramGiam)
+        public async Task<double> TinhGiaSauKhuyenMai(int sanPhamId, double phanTramGiam)
         {
-            var sp = _sanPhamService.GetById(sanPhamId);
+            var sp = await _sanPhamService.GetById(sanPhamId);
             if (sp == null) return 0;
             return (double)sp.GiaBan * (1 - phanTramGiam / 100);
         }

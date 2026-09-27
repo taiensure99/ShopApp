@@ -2,6 +2,6 @@
 {
     public interface ISanPhamKhuyenMaiService
     {
-        double TinhGiaSauKhuyenMai(int sanPhamId, double phanTramGiam);
+        Task<double> TinhGiaSauKhuyenMai(int sanPhamId, double phanTramGiam);
     }
 }

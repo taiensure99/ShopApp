@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ShopApp.Interfaces;
 using ShopApp.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 
 namespace ShopApp.Controllers
 {
@@ -31,18 +32,21 @@ namespace ShopApp.Controllers
 
         // GET: api/SanPham
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(_danhSach);
+            var list = await _sanPhamService.GetAllSanPham();
+            return Ok(list);
         }
 
         // GET: api/SanPham/1
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var sp = _danhSach.FirstOrDefault(x => x.Id == id);
+            var sp = await _sanPhamService.GetById(id);
             if (sp == null)
-                return NotFound($"Không tìm thấy sản phẩm Id={id}");
+            {
+                return NotFound(new { message = $"Không tìm thấy sản phẩm có ID = {id}" });
+            }
 
             return Ok(sp);
         }
@@ -111,49 +115,44 @@ namespace ShopApp.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] SanPham sanPham)
+        public async Task<IActionResult> Create([FromBody] SanPham sanPham) //bắt buộc phải async Task<T> để dùng await
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            // Tạo Id mới
-            int newId = _danhSach.Max(s => s.Id) + 1;
-            sanPham.Id = newId;
-            _danhSach.Add(sanPham);
-            return CreatedAtAction(nameof(GetById), new { id = sanPham.Id }, sanPham);
+
+            var ketqua = await _sanPhamService.CreateSanPham(sanPham);
+            if(!ketqua)
+            {
+                return StatusCode(500, "Đã xảy ra lỗi khi thêm sản phẩm.");
+            }
+            return Ok("Thêm mới sản phẩm thành công");
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] SanPham sanPham)
+        public async Task<IActionResult> Update(int id, [FromBody] SanPham sanPham)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var existingSanPham = _danhSach.FirstOrDefault(s => s.Id == id);
-            if (existingSanPham == null)
+            var ketqua = await _sanPhamService.UpdateSanPham(id,sanPham);
+            if (!ketqua)
             {
-                return NotFound($"Không tìm thấy sản phẩm Id={id}");
+                return StatusCode(500, "Đã xảy ra lỗi khi cập nhật sản phẩm.");
             }
-            // Cập nhật thông tin sản phẩm
-            existingSanPham.Ten = sanPham.Ten;
-            existingSanPham.GiaBan = sanPham.GiaBan;
-            existingSanPham.TonKho = sanPham.TonKho;
-            existingSanPham.DanhMuc = sanPham.DanhMuc;
-            existingSanPham.IsActive = sanPham.IsActive;
-            return NoContent();
+            return Ok("Cập nhật sản phẩm thành công");
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var existingSanPham = _danhSach.FirstOrDefault(s => s.Id == id);
-            if (existingSanPham == null)
+            var kq = await _sanPhamService.DeleteSanPham(id); 
+            if (!kq)
             {
-                return NotFound($"Không tìm thấy sản phẩm Id={id}");
+                return NotFound(new { message = $"Xoá  sản phẩm có ID = {id} thất bại" });
             }
-            _danhSach.Remove(existingSanPham);
             return Ok($"Đã xóa sản phẩm Id={id}");
         }
 
