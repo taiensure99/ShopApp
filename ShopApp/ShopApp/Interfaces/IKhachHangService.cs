@@ -6,14 +6,14 @@ namespace ShopApp.Interfaces
     {
         bool KiemTraEmailTonTai(string email);
         int DemTongKhach();
-        void ThemKhachHang(KhachHang khachHang);
+        Task<bool> ThemKhachHang(KhachHang khachHang);
 
-        List<KhachHang> GetAll();
-        List<KhachHang> TimKiemTheoTen(string ten);
-        KhachHang GetById(int id);
+        Task<List<KhachHang>> GetAll();
+        Task<List<KhachHang>> TimKiemTheoTen(string ten);
+        Task<KhachHang> GetById(int id);
       
         KhachHang GetByEmail(string email);
-        bool UpdateKhachHang(int id, KhachHang khachHang);
-        bool DeleteKhachHang(int id);
+        Task<bool> UpdateKhachHang(int id, KhachHang khachHang);
+        Task<bool> DeleteKhachHang(int id);
     }
 }

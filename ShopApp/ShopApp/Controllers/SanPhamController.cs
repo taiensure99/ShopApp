@@ -51,20 +51,6 @@ namespace ShopApp.Controllers
             return Ok(sp);
         }
 
-        [HttpGet("loc")]    
-        public IActionResult LocSanPham([FromQuery] string? danhMuc, [FromQuery] double? giaToiDa)
-        {
-            var ketQua = _danhSach.AsEnumerable();
-            if (!string.IsNullOrEmpty(danhMuc))
-            {
-                ketQua = ketQua.Where(x => x.DanhMuc.Equals(danhMuc, StringComparison.OrdinalIgnoreCase));
-            }
-            if (giaToiDa.HasValue)
-            {
-                ketQua = ketQua.Where(x => x.GiaBan <= (decimal)giaToiDa.Value);
-            }
-            return Ok(ketQua);
-        }
 
         [HttpGet("moi-nhat")]
         public IActionResult GetMoiNhat()
@@ -236,6 +222,19 @@ namespace ShopApp.Controllers
             });
         }
 
+        [HttpGet("loc")]
+        public async Task<IActionResult> Loc([FromQuery] string danhMuc, [FromQuery] decimal? giaToiDa)
+        {
+            var sanPhams = await _sanPhamService.LocAsync(danhMuc, giaToiDa);
+            return Ok(sanPhams);
+        }
+
+        [HttpGet("thong-ke-theo-danh-muc")]
+        public async Task<IActionResult> ThongKeTheoDanhMuc()
+        {
+            var result = await _sanPhamService.ThongKeTheoDanhMucAsync();
+            return Ok(result);
+        }
     }
 
 

@@ -13,5 +13,9 @@ namespace ShopApp.Interfaces
         Task<bool> CreateSanPham(SanPham sanPham);
         Task<bool> UpdateSanPham(int id, SanPham sanPham);
         Task<bool> DeleteSanPham(int id);
+        Task<List<SanPham>> LocAsync(string? danhMuc, decimal? giaToiDa);
+        Task<Dictionary<string, int>> ThongKeTheoDanhMucAsync();
+        Task<bool> ChuyenSanPhamGiuaDanhMucAsync(int spId1, int spId2);
+
     }
 }
