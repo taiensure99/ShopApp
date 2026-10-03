@@ -1,15 +1,20 @@
 ﻿using ShopApp.Interfaces;
+using ShopApp.Models;
+using System.Runtime.CompilerServices;
 
 namespace ShopApp.Services
 {
     public class SanPhamKhuyenMaiService : ISanPhamKhuyenMaiService
     {
         private readonly ISanPhamService _sanPhamService;
+        private readonly ShopAppDbContext _context;
 
-        public SanPhamKhuyenMaiService(ISanPhamService sanPhamService)
+        public SanPhamKhuyenMaiService(ISanPhamService sanPhamService, ShopAppDbContext context)
         {
             _sanPhamService = sanPhamService;
+            _context = context;
         }
+        
 
         public async Task<double> TinhGiaSauKhuyenMai(int sanPhamId, double phanTramGiam)
         {

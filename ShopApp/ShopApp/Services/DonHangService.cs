@@ -1,18 +1,17 @@
 ﻿using ShopApp.Models;
 using ShopApp.Interfaces;
+using System.Security.AccessControl;
+using Microsoft.EntityFrameworkCore;
 
 namespace ShopApp.Services
 {
     public class DonHangService : IDonHangService
     {
-        private static readonly List<DonHang> _donHangs = new List<DonHang>
+        private readonly ShopAppDbContext _context;
+        public DonHangService(ShopAppDbContext context)
         {
-            new DonHang { Id = 1, MaDon = "DH001", TongTien = 250000, TrangThai = "Chờ xử lý" ,NgayDat = new  DateTime(2026, 8, 15)},
-            new DonHang { Id = 2, MaDon = "DH002", TongTien = 550000, TrangThai = "Đã giao" ,NgayDat = new DateTime(2024, 8, 20)},
-            new DonHang { Id = 3, MaDon = "DH003", TongTien = 120000, TrangThai = "Đã hủy",NgayDat = new DateTime(2026, 9, 5) },
-            new DonHang { Id = 4, MaDon = "DH004", TongTien = 890000, TrangThai = "Đã giao" , NgayDat = new DateTime(2025, 9, 5) },
-            new DonHang { Id = 5, MaDon = "DH005", TongTien = 300000, TrangThai = "Chờ xử lý", NgayDat =  new DateTime(2026, 9, 5)}
-        };
+            _context = context;
+        }
 
         public DonHang DatHang(DatHangRequest request)
         {
@@ -26,7 +25,7 @@ namespace ShopApp.Services
                 return 0;
             }
 
-            return _donHangs.Count(d => d.TrangThai != null &&
+            return _context.DonHangs.Count(d => d.TrangThai != null &&
                                         d.TrangThai.Trim().Equals(trangThai.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
@@ -38,6 +37,49 @@ namespace ShopApp.Services
         DonHang IDonHangService.ThemDonHang(DonHang donHang)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<List<DonHang>> ChiTietDonHang()
+        {
+            var KetQua = await _context.DonHangs
+                .Join (_context.KhachHangs,
+                    dh => dh.KhachHangId,kh => kh.Id,
+                    (dh,kh) => new DonHang
+                    {
+                        Id = dh.Id,
+                        MaDon = dh.MaDon,
+                        KhachHangId = dh.KhachHangId,
+                        NgayDat = dh.NgayDat,
+                        TrangThai = dh.TrangThai,
+                        TongTien = dh.TongTien,
+                        KhachHang = kh
+                    }).ToListAsync();
+            return KetQua;
+        }
+
+        public async Task<List<DonHang>> ChiTietDayDu()
+        {
+            var KetQua = await _context.DonHangs
+                .Join(_context.KhachHangs,
+                    dh => dh.KhachHangId, kh => kh.Id,
+                    (dh,kh) => new {dh, kh}
+                    ).Join
+                (_context.ChiTietDonHangs,
+                    d => d.dh.Id, ctdh => ctdh.DonHangId,
+                    (d, ctdh) => new DonHang
+                    {
+                        Id = d.dh.Id,
+                        MaDon = d.dh.MaDon,
+                        KhachHangId = d.dh.KhachHangId,
+                        NgayDat = d.dh.NgayDat,
+                        TrangThai = d.dh.TrangThai,
+                        TongTien = d.dh.TongTien,
+                        KhachHang = d.kh,
+                        ChiTietDonHangs = new List<ChiTietDonHang> { ctdh }
+                    }).ToListAsync();
+
+
+            return KetQua;
         }
     }
 }

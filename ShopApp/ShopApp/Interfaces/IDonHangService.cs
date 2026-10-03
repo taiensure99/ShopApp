@@ -11,5 +11,9 @@ namespace ShopApp.Interfaces
         DonHang ThemDonHang(DonHang donHang);
 
         DonHang DatHang(DatHangRequest request);
+
+        Task<List<DonHang>> ChiTietDonHang();
+        Task<List<DonHang>> ChiTietDayDu();
+
     }
 }
