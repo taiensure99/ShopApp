@@ -22,4 +22,7 @@ public partial class KhachHang
     public virtual ICollection<DonHang> DonHangs { get; set; } = new List<DonHang>();
 
     public virtual ICollection<PhienDangNhap> PhienDangNhaps { get; set; } = new List<PhienDangNhap>();
+    public decimal TongTien { get; internal set; }
+    public int SoLuongDon { get; internal set; }
+    public decimal TongChiTieu { get; internal set; }
 }

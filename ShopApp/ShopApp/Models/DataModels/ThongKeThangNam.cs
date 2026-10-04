@@ -4,5 +4,6 @@
     {
         public int Thang { get; set; }
         public decimal DoanhThu { get; set; }
+
     }
 }

@@ -46,5 +46,35 @@ namespace ShopApp.Controllers
             return Ok(ketQua);
         }
 
+        [HttpGet("khach-hang-vip")]
+        public async Task<IActionResult> LayDanhSachKhachHangVIP()
+        {
+            var danhSachKhachHangVIP = await _thongKeService.LayDanhSachKhachHangVIP();
+            if (danhSachKhachHangVIP == null || !danhSachKhachHangVIP.Any())
+            {
+                return NotFound(new { message = "Không có khách hàng VIP." });
+            }
+            return Ok(danhSachKhachHangVIP);
+        }
+        [HttpGet("san-pham-ban-chay")]
+        public async Task<IActionResult> LaySanPhamBanChay()
+        {
+            var danhSachSanPhamBanChay = await _thongKeService.LaySanPhamBanChay();
+            if (danhSachSanPhamBanChay == null || !danhSachSanPhamBanChay.Any())
+            {
+                return NotFound(new { message = "Không có sản phẩm bán chạy." });
+            }
+            return Ok(danhSachSanPhamBanChay);
+        }
+        [HttpGet("bao-cao-tong-hop")]
+        public async Task<IActionResult> LayBaoCaoTongHop()
+        {
+            var baoCao = await _thongKeService.LayBaoCaoTongHop();
+            if (baoCao == null)
+            {
+                return NotFound(new { message = "Không có dữ liệu báo cáo tổng hợp." });
+            }
+            return Ok(baoCao);
+        }
     }
 }

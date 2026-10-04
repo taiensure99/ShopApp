@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ShopApp.Models;
 using ShopApp.Models.DataModels;
 
 namespace ShopApp.Interfaces
@@ -9,5 +10,8 @@ namespace ShopApp.Interfaces
         int DenSanPhamHetHang();
         Task<int> DemDonHangTheoTrangThai(string trangThai);
         Task<List<ThongKeThangNam>> TinhDoanhThuTheoThangNam(int nam);
+        Task<List<ThongKeKhanhHangVip>> LayDanhSachKhachHangVIP();
+        Task<List<SanPhamBanChay>> LaySanPhamBanChay();
+        Task<ThongKeBaoCaoTongHop> LayBaoCaoTongHop();
     }
 }
