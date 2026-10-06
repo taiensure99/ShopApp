@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ShopApp.Interfaces;
 using ShopApp.Models;
+using ShopApp.Models.DataModels;
 
 namespace ShopApp.Services
 {
@@ -123,6 +125,45 @@ namespace ShopApp.Services
                 await transaction.RollbackAsync();
                 throw; 
             }
+        }
+
+        public async Task<List<SanPham>> LocGiaAsync(decimal giamin, decimal giamax)
+        {
+            var query = _context.SanPhams.AsQueryable();
+            query = query.Where(sp => sp.GiaBan >= giamin && sp.GiaBan <= giamax).OrderBy(sp => sp.GiaBan);
+            return await query.ToListAsync();
+            //var List = await _context.SanPhams.Where(sp => sp.GiaBan >= giamin && sp.GiaBan <= giamax).OrderBy(sp => sp.GiaBan).ToListAsync();
+            //return List;
+        }
+
+        public async Task<List<SanPham>> DanhSachRutGonAsync()
+        {
+            return await _context.SanPhams.Select(sp => new SanPham
+            {
+                Id = sp.Id,
+                Ten = sp.Ten,
+                GiaBan = sp.GiaBan
+            }).ToListAsync();
+        }
+        public async Task<DenSoDonHang> DemTheoDanhMucAsync()
+        {
+            var result = await _context.SanPhams
+                .GroupBy(sp => sp.DanhMuc)
+                .Select(g => new { DanhMuc = g.Key, SoLuong = g.Count() })
+                .ToListAsync();
+            return new DenSoDonHang
+            {
+                DanhMuc = result.FirstOrDefault()?.DanhMuc,
+                SoLuong = result.Sum(x => x.SoLuong)
+            };
+        }
+        public async Task<List<SanPham>> TopDatNhatTheoDanhMucAsync()
+        {
+            var result = await _context.SanPhams
+                .GroupBy(sp => sp.DanhMuc)
+                .Select(g => new { DanhMuc = g.Key, TopSanPham = g.OrderByDescending(sp => sp.GiaBan).Take(1) })
+                .ToListAsync();
+            return result.SelectMany(x => x.TopSanPham).ToList();
         }
     }
 }

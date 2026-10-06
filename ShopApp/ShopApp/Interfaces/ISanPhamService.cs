@@ -1,4 +1,6 @@
-﻿using ShopApp.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using ShopApp.Models;
+using ShopApp.Models.DataModels;
 namespace ShopApp.Interfaces
 
 {
@@ -16,6 +18,10 @@ namespace ShopApp.Interfaces
         Task<List<SanPham>> LocAsync(string? danhMuc, decimal? giaToiDa);
         Task<Dictionary<string, int>> ThongKeTheoDanhMucAsync();
         Task<bool> ChuyenSanPhamGiuaDanhMucAsync(int spId1, int spId2);
+        Task<List<SanPham>> LocGiaAsync(decimal giamin, decimal giamax);
+        Task<List<SanPham>> DanhSachRutGonAsync();
+        Task<DenSoDonHang> DemTheoDanhMucAsync();
+        Task<List<SanPham>> TopDatNhatTheoDanhMucAsync();
 
     }
 }

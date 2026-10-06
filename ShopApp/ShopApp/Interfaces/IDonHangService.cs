@@ -1,5 +1,7 @@
-﻿using ShopApp.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 using ShopApp.Interfaces;
+using ShopApp.Models;
+using ShopApp.Models.DataModels;
 using System.Collections.Generic;
 namespace ShopApp.Interfaces
 
@@ -14,6 +16,7 @@ namespace ShopApp.Interfaces
 
         Task<List<DonHang>> ChiTietDonHang();
         Task<List<DonHang>> ChiTietDayDu();
-
+        Task<List<DonHangKhacHangDTO>> ChiTietDonHangKemTenKhach();
+        Task<List<ThongKeKhanhHangVip>> ThongKeTheoKhach();
     }
 }

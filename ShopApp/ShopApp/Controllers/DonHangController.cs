@@ -7,7 +7,7 @@ namespace ShopApp.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DonHangController : Controller 
+    public class DonHangController : Controller
     {
         private readonly IDonHangService _donHangService;
 
@@ -60,7 +60,7 @@ namespace ShopApp.Controllers
         //        return Ok(ketQua);
         //}
 
-        
+
         //[HttpGet("{nam:int}/{thang:int}")]
         //public IActionResult GetByNamThang(int nam, int thang)
         //{
@@ -142,5 +142,18 @@ namespace ShopApp.Controllers
             var KetQua = await _donHangService.ChiTietDonHang();
             return Ok(KetQua);
         }
-    };
+        [HttpGet("kem-ten-khach")]
+        public async Task<IActionResult> ChiTietDonHangKemTenKhach()
+        {
+            var KetQua = await _donHangService.ChiTietDonHangKemTenKhach();
+            return Ok(KetQua);
+        }
+
+        [HttpGet("thong-ke-theo-khach")]
+        public async Task<IActionResult> ThongKeTheoKhach()
+        {
+            var KetQua = await _donHangService.ThongKeTheoKhach();
+            return Ok(KetQua);
+        }
+    }
 }

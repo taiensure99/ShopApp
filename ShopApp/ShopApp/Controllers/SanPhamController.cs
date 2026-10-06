@@ -13,14 +13,6 @@ namespace ShopApp.Controllers
     {
         // Dữ liệu tạm (List tĩnh) — sẽ được THAY BẰNG DATABASE THẬT
         // ở buổi 34 khi học Entity Framework Core
-        private static List<SanPham> _danhSach = new List<SanPham>
-        {
-            new SanPham { Id = 1, Ten = "Áo thun nam basic", GiaBan = 250000, TonKho = 15, DanhMuc = "Áo" },
-            new SanPham { Id = 2, Ten = "Quần jean slim fit", GiaBan = 450000, TonKho = 10, DanhMuc = "ao" },
-            new SanPham { Id = 3, Ten = "Giày sneaker trắng", GiaBan = 800000, TonKho = 5,  DanhMuc = "Giày" },
-            new SanPham { Id = 4, Ten = "Mũ lưỡi trai", GiaBan = 150000, TonKho = 20, DanhMuc = "Phụ kiện" }
-        };
-
         private readonly ISanPhamService _sanPhamService;
         private readonly IThongKeService _thongKeService;
 
@@ -52,53 +44,53 @@ namespace ShopApp.Controllers
         }
 
 
-        [HttpGet("moi-nhat")]
-        public IActionResult GetMoiNhat()
-        {
-            var moiNhat = _danhSach.TakeLast(3).ToList();
-            if (!moiNhat.Any())
-            {
-                return NotFound(new { message = "Danh sách hiện đang trống." });
-            }
+        //[HttpGet("moi-nhat")]
+        //public IActionResult GetMoiNhat()
+        //{
+        //    var moiNhat = _danhSach.TakeLast(3).ToList();
+        //    if (!moiNhat.Any())
+        //    {
+        //        return NotFound(new { message = "Danh sách hiện đang trống." });
+        //    }
 
-            return Ok(moiNhat);
-        }
+        //    return Ok(moiNhat);
+        //}
 
-        [HttpGet("het-hang")]
-        public IActionResult GetHetHang()
-        {
-            var hetHang = _danhSach.Where(x => x.TonKho == 0);
+        //[HttpGet("het-hang")]
+        //public IActionResult GetHetHang()
+        //{
+        //    var hetHang = _danhSach.Where(x => x.TonKho == 0);
 
-            return Ok(hetHang);
-        }
+        //    return Ok(hetHang);
+        //}
 
-        [HttpGet("danhmuc/{ten:alpha}")]
-        public IActionResult GetByDanhMuc(string ten)
-        {
-            var ketQua = _danhSach
-                .Where(s => s.DanhMuc.Equals(ten, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+        //[HttpGet("danhmuc/{ten:alpha}")]
+        //public IActionResult GetByDanhMuc(string ten)
+        //{
+        //    var ketQua = _danhSach
+        //        .Where(s => s.DanhMuc.Equals(ten, StringComparison.OrdinalIgnoreCase))
+        //        .ToList();
 
-            if (!ketQua.Any())
-            {
-                return NotFound(new { message = $"Không tìm thấy sản phẩm nào thuộc danh mục: {ten}" });
-            }
+        //    if (!ketQua.Any())
+        //    {
+        //        return NotFound(new { message = $"Không tìm thấy sản phẩm nào thuộc danh mục: {ten}" });
+        //    }
 
-            return Ok(ketQua);
-        }
+        //    return Ok(ketQua);
+        //}
 
-        [HttpGet("timten/{Ten:minlength(3)}")]
-        public IActionResult GetTimKiem(string Ten) {
-            var KetQua = _danhSach
-                .Where (s => s.Ten.Contains(Ten, StringComparison.OrdinalIgnoreCase))
-        .ToList();
-            if (!KetQua.Any())
-            {
-                return NotFound(new { message = $"Không tìm thấy sản phẩm nào chứa từ khóa: {Ten}" });
-            }
+        //[HttpGet("timten/{Ten:minlength(3)}")]
+        //public IActionResult GetTimKiem(string Ten) {
+        //    var KetQua = _danhSach
+        //        .Where (s => s.Ten.Contains(Ten, StringComparison.OrdinalIgnoreCase))
+        //.ToList();
+        //    if (!KetQua.Any())
+        //    {
+        //        return NotFound(new { message = $"Không tìm thấy sản phẩm nào chứa từ khóa: {Ten}" });
+        //    }
 
-            return Ok(KetQua);
-        }
+        //    return Ok(KetQua);
+        //}
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] SanPham sanPham) //bắt buộc phải async Task<T> để dùng await
@@ -109,7 +101,7 @@ namespace ShopApp.Controllers
             }
 
             var ketqua = await _sanPhamService.CreateSanPham(sanPham);
-            if(!ketqua)
+            if (!ketqua)
             {
                 return StatusCode(500, "Đã xảy ra lỗi khi thêm sản phẩm.");
             }
@@ -123,7 +115,7 @@ namespace ShopApp.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var ketqua = await _sanPhamService.UpdateSanPham(id,sanPham);
+            var ketqua = await _sanPhamService.UpdateSanPham(id, sanPham);
             if (!ketqua)
             {
                 return StatusCode(500, "Đã xảy ra lỗi khi cập nhật sản phẩm.");
@@ -134,7 +126,7 @@ namespace ShopApp.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var kq = await _sanPhamService.DeleteSanPham(id); 
+            var kq = await _sanPhamService.DeleteSanPham(id);
             if (!kq)
             {
                 return NotFound(new { message = $"Xoá  sản phẩm có ID = {id} thất bại" });
@@ -142,73 +134,73 @@ namespace ShopApp.Controllers
             return Ok($"Đã xóa sản phẩm Id={id}");
         }
 
-        [HttpPatch("{id}/gia")]
-        public IActionResult CapNhatGia(int id, [FromBody] CapNhatGiaRequest req) 
-        {
-            var sanPham = _danhSach.FirstOrDefault(s => s.Id == id);
-            if (sanPham == null)
-            {
-                return NotFound(new { message = $"Không tìm thấy sản phẩm có ID = {id}" });
-            }
+        //[HttpPatch("{id}/gia")]
+        //public IActionResult CapNhatGia(int id, [FromBody] CapNhatGiaRequest req) 
+        //{
+        //    var sanPham = _danhSach.FirstOrDefault(s => s.Id == id);
+        //    if (sanPham == null)
+        //    {
+        //        return NotFound(new { message = $"Không tìm thấy sản phẩm có ID = {id}" });
+        //    }
 
-            if (req.GiaBanMoi < 0)
-            {
-                return BadRequest(new { message = "Giá sản phẩm không được nhỏ hơn 0." });
-            }
+        //    if (req.GiaBanMoi < 0)
+        //    {
+        //        return BadRequest(new { message = "Giá sản phẩm không được nhỏ hơn 0." });
+        //    }
 
-            sanPham.GiaBan = (decimal)req.GiaBanMoi;
+        //    sanPham.GiaBan = (decimal)req.GiaBanMoi;
 
-            return Ok(new
-            {
-                message = "Cập nhật giá thành công!",
-                data = sanPham
-            });
-        }
-        [HttpPost("nhieu")]
-        public IActionResult CreateNhieu([FromBody] List<SanPham> danhSachMoi)
-        {
-            // 1. Tạo 2 danh sách để phân loại kết quả
-            var thanhCong = new List<SanPham>();
-            var thatBai = new List<object>(); // Dùng object ẩn danh để linh hoạt chứa lỗi
+        //    return Ok(new
+        //    {
+        //        message = "Cập nhật giá thành công!",
+        //        data = sanPham
+        //    });
+        //}
+        //[HttpPost("nhieu")]
+        //public IActionResult CreateNhieu([FromBody] List<SanPham> danhSachMoi)
+        //{
+        //    // 1. Tạo 2 danh sách để phân loại kết quả
+        //    var thanhCong = new List<SanPham>();
+        //    var thatBai = new List<object>(); // Dùng object ẩn danh để linh hoạt chứa lỗi
 
-            foreach (var sp in danhSachMoi)
-            {
-                // 2. Khởi tạo bộ kiểm tra (ValidationContext) cho từng sản phẩm
-                var validationContext = new ValidationContext(sp);
-                var validationResults = new List<ValidationResult>();
+        //    foreach (var sp in danhSachMoi)
+        //    {
+        //        // 2. Khởi tạo bộ kiểm tra (ValidationContext) cho từng sản phẩm
+        //        var validationContext = new ValidationContext(sp);
+        //        var validationResults = new List<ValidationResult>();
 
-                // Hàm này sẽ kiểm tra sp dựa trên các Data Annotations ([Required], [Range]...)
-                bool isValid = Validator.TryValidateObject(sp, validationContext, validationResults, true);
+        //        // Hàm này sẽ kiểm tra sp dựa trên các Data Annotations ([Required], [Range]...)
+        //        bool isValid = Validator.TryValidateObject(sp, validationContext, validationResults, true);
 
-                if (isValid)
-                {
-                    // 3. Nếu HỢP LỆ -> Tạo ID mới và thêm vào Database/List
-                    int newId = _danhSach.Any() ? _danhSach.Max(s => s.Id) + 1 : 1;
-                    sp.Id = newId;
-                    _danhSach.Add(sp);
+        //        if (isValid)
+        //        {
+        //            // 3. Nếu HỢP LỆ -> Tạo ID mới và thêm vào Database/List
+        //            int newId = _danhSach.Any() ? _danhSach.Max(s => s.Id) + 1 : 1;
+        //            sp.Id = newId;
+        //            _danhSach.Add(sp);
 
-                    thanhCong.Add(sp);
-                }
-                else
-                {
-                    // 4. Nếu KHÔNG HỢP LỆ -> Gom các thông báo lỗi lại
-                    var errors = validationResults.Select(r => r.ErrorMessage).ToList();
-                    thatBai.Add(new
-                    {
-                        SanPhamLoi = sp,
-                        LyDo = errors
-                    });
-                }
-            }
+        //            thanhCong.Add(sp);
+        //        }
+        //        else
+        //        {
+        //            // 4. Nếu KHÔNG HỢP LỆ -> Gom các thông báo lỗi lại
+        //            var errors = validationResults.Select(r => r.ErrorMessage).ToList();
+        //            thatBai.Add(new
+        //            {
+        //                SanPhamLoi = sp,
+        //                LyDo = errors
+        //            });
+        //        }
+        //    }
 
-            // 5. Trả về kết quả tổng hợp (Dùng Status 200 OK hoặc 207 Multi-Status)
-            return Ok(new
-            {
-                ThongBao = $"Xử lý hoàn tất. Thêm thành công: {thanhCong.Count}, Lỗi: {thatBai.Count}",
-                DanhSachThanhCong = thanhCong,
-                DanhSachLoi = thatBai
-            });
-        }
+        //    // 5. Trả về kết quả tổng hợp (Dùng Status 200 OK hoặc 207 Multi-Status)
+        //    return Ok(new
+        //    {
+        //        ThongBao = $"Xử lý hoàn tất. Thêm thành công: {thanhCong.Count}, Lỗi: {thatBai.Count}",
+        //        DanhSachThanhCong = thanhCong,
+        //        DanhSachLoi = thatBai
+        //    });
+        //}
         [HttpGet("thong-ke")]
         public IActionResult ThongKe()
         {
@@ -234,6 +226,32 @@ namespace ShopApp.Controllers
         {
             var result = await _sanPhamService.ThongKeTheoDanhMucAsync();
             return Ok(result);
+        }
+
+        [HttpGet("loc-gia")]
+        public async Task<IActionResult> LocGia([FromQuery] decimal Giamin, [FromQuery] decimal Giamax)
+        {
+            var sanPhams = await _sanPhamService.LocGiaAsync(Giamin, Giamax);
+            return Ok(sanPhams);
+        }
+        [HttpGet("Danh-sach-rut-gon")]
+        public async Task<IActionResult> DanhSachRutGon()
+        {
+            var sanPhams = await _sanPhamService.DanhSachRutGonAsync();
+            return Ok(sanPhams);
+        }
+
+        [HttpGet("dem-theo-danh-muc")]
+        public async Task<IActionResult> DemTheoDanhMuc()
+        {
+            var soLuong = await _sanPhamService.DemTheoDanhMucAsync();
+            return Ok(new { SoLuong = soLuong });
+        }
+        [HttpGet("top-dat-nhat-theo-danh-muc")]
+        public async Task<IActionResult> TopDatNhatTheoDanhMuc()
+        {
+            var topSanPhams = await _sanPhamService.TopDatNhatTheoDanhMucAsync();
+            return Ok(topSanPhams);
         }
     }
 

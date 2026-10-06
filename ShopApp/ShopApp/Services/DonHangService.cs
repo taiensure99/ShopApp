@@ -1,7 +1,8 @@
-﻿using ShopApp.Models;
+﻿using Microsoft.EntityFrameworkCore;
 using ShopApp.Interfaces;
+using ShopApp.Models;
+using ShopApp.Models.DataModels;
 using System.Security.AccessControl;
-using Microsoft.EntityFrameworkCore;
 
 namespace ShopApp.Services
 {
@@ -79,6 +80,38 @@ namespace ShopApp.Services
                     }).ToListAsync();
 
 
+            return KetQua;
+        }
+        public async Task<List<DonHangKhacHangDTO>> ChiTietDonHangKemTenKhach()
+        {
+            var KetQua = await _context.DonHangs
+                .Join(_context.KhachHangs,
+                    dh => dh.KhachHangId, kh => kh.Id,
+                    (dh, kh) => new DonHangKhacHangDTO
+                    {
+                        Id = dh.Id,
+                        MaDon = dh.MaDon,
+                        KhachHangId = dh.KhachHangId,
+                        NgayDat = dh.NgayDat,
+                        TrangThai = dh.TrangThai,
+                        TongTien = dh.TongTien,
+                        TenKhachHang = kh.HoTen
+                    }).ToListAsync();
+            return KetQua;
+        }
+
+        public async Task<List<ThongKeKhanhHangVip>> ThongKeTheoKhach()
+        {
+            var KetQua = await _context.DonHangs
+                .Where(dh => dh.TrangThai == "da_giao")
+                .GroupBy(dh => dh.KhachHangId)
+                .Select(g => new ThongKeKhanhHangVip
+                {
+                    Id = g.Key,
+                    SoLuongDon = g.Count(),
+                    TongChiTieu = g.Sum(dh => dh.TongTien)
+                })
+                .ToListAsync();
             return KetQua;
         }
     }
