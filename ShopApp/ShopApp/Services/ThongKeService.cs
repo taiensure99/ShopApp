@@ -72,21 +72,33 @@ namespace ShopApp.Services
         public async Task<List<SanPhamBanChay>> LaySanPhamBanChay()
         {
 
-            return await _context.ChiTietDonHangs
-                .Where(ct => ct.DonHang.TrangThai == "da_giao")
-                .GroupBy(ct => ct.SanPhamId)
-                .Select(g => new SanPhamBanChay
+            //return await _context.ChiTietDonHangs
+            //    .Where(ct => ct.DonHang.TrangThai == "da_giao")
+            //    .GroupBy(ct => ct.SanPhamId)
+            //    .Select(g => new SanPhamBanChay
+            //    {
+            //        SanPhamId = g.Key,
+            //        SoLuongBan = g.Sum(ct => ct.SoLuong)
+            //    })
+            //    .Join(_context.SanPhams,
+            //    sp => sp.SanPhamId, 
+            //    s => s.Id, 
+            //    (sp, s) => new 
+            //    { SanPhamBanChay = sp, SanPham = s })
+            //    .Select(x => x.SanPhamBanChay)
+            //    .ToListAsync(); 
+
+            var SoLuongDaBan = await _context.SanPhams.Include(sp => sp.ChiTietDonHangs)
+                .Select(sp => new SanPhamBanChay
                 {
-                    SanPhamId = g.Key,
-                    SoLuongBan = g.Sum(ct => ct.SoLuong)
+                    SanPhamId = sp.Id,
+                    SoLuongBan = sp.ChiTietDonHangs
+                        .Where(ct => ct.DonHang.TrangThai == "da_giao")
+                        .Sum(ct => (int?)ct.SoLuong) ?? 0
                 })
-                .Join(_context.SanPhams,
-                sp => sp.SanPhamId, 
-                s => s.Id, 
-                (sp, s) => new 
-                { SanPhamBanChay = sp, SanPham = s })
-                .Select(x => x.SanPhamBanChay)
+                .OrderByDescending(sp => sp.SoLuongBan)
                 .ToListAsync();
+            return SoLuongDaBan;
         }
         public async Task<ThongKeBaoCaoTongHop> LayBaoCaoTongHop()
         {

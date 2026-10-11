@@ -25,24 +25,16 @@ namespace ShopApp.Controllers
         }
 
 
-        //[HttpGet("{id}")]
-        //public IActionResult GetById(int id)
-        //{
-        //    var donHang = _donHangs.FirstOrDefault(d => d.Id == id);
-
-        //    if (donHang == null)
-        //    {
-        //        return NotFound(new { message = $"Không tìm thấy đơn hàng với Id = {id}" });
-        //    }
-        //    if (donHang.TongTien <= 0)
-        //    {
-        //        return BadRequest("Tổng tiền phải lớn hơn 0");
-
-        //    }
-
-
-        //    return Ok(donHang);
-        //}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var donHang = await _donHangService.GetById(id);
+            if (donHang == null)
+            {
+                return NotFound(new { message = $"Không tìm thấy đơn hàng với Id = {id}" });
+            }
+            return Ok(donHang);
+        }
         //[HttpGet("theo-trangthai/{trangThai}")]
         //public IActionResult GetByTrangThai(string trangThai)
         //{
@@ -149,6 +141,19 @@ namespace ShopApp.Controllers
         public async Task<IActionResult> ThongKeTheoKhach()
         {
             var KetQua = await _donHangService.ThongKeTheoKhach();
+            return Ok(KetQua);
+        }
+
+        [HttpGet("chi-tiet-don-hang-KhachHang/{id}")]
+        public async Task<IActionResult> ChiTietDonHangKemKhachHang(int id)
+        {
+            var KetQua = await _donHangService.ChiTietDonHangKemKhachHang(id);
+            return Ok(KetQua);
+        }
+        [HttpGet("lay-don-hang-theo-ctSan-pham/{id}")]
+        public async Task<IActionResult> DonHangKemChiTietSanPham(int id) 
+        {
+            var KetQua = await _donHangService.DonHangKemChiTietSanPham(id);
             return Ok(KetQua);
         }
     }
