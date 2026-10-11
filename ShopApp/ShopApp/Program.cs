@@ -3,6 +3,7 @@ using ShopApp.Interfaces;
 using ShopApp.Models;
 using ShopApp.Services;
 using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +26,11 @@ builder.Services.AddCors(options =>
     });
 });
 builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler =
+            ReferenceHandler.IgnoreCycles;
+    })
     .ConfigureApiBehaviorOptions(options =>
     {
         // Tắt tính năng tự động trả về 400 khi Model không hợp lệ

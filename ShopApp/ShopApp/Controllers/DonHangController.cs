@@ -2,6 +2,7 @@
 using ShopApp.Interfaces;
 using ShopApp.Models;
 using ShopApp.Services;
+using System.Threading.Tasks;
 namespace ShopApp.Controllers
 
 {
@@ -16,11 +17,12 @@ namespace ShopApp.Controllers
             _donHangService = donHangService;
         }
 
-        //[HttpGet]
-        //public IActionResult GetAll()
-        //{
-        //    return Ok(_donHangs);
-        //}
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var list = await _donHangService.GetAll();
+            return Ok(list);
+        }
 
 
         //[HttpGet("{id}")]
@@ -129,12 +131,6 @@ namespace ShopApp.Controllers
         //    return Ok(new { TrangThai = trangThai, SoLuong = soLuong });
         //}
 
-        [HttpGet("chiTietDonHang")]
-        public async Task<IActionResult> ChiTietDonHang()
-        {
-            var KetQua = await _donHangService.ChiTietDonHang();
-            return Ok(KetQua);
-        }
 
         [HttpGet("chi-tiet-day-du")]
         public async Task<IActionResult> ChiTietDayDu()

@@ -18,5 +18,6 @@ namespace ShopApp.Interfaces
         Task<List<DonHang>> ChiTietDayDu();
         Task<List<DonHangKhacHangDTO>> ChiTietDonHangKemTenKhach();
         Task<List<ThongKeKhanhHangVip>> ThongKeTheoKhach();
+        Task<List<DonHang>> GetAll();
     }
 }

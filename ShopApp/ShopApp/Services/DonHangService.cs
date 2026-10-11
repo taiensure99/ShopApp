@@ -42,19 +42,24 @@ namespace ShopApp.Services
 
         public async Task<List<DonHang>> ChiTietDonHang()
         {
+            //var KetQua = await _context.DonHangs
+            //    .Join (_context.KhachHangs,
+            //        dh => dh.KhachHangId,kh => kh.Id,
+            //        (dh,kh) => new DonHang
+            //        {
+            //            Id = dh.Id,
+            //            MaDon = dh.MaDon,
+            //            KhachHangId = dh.KhachHangId,
+            //            NgayDat = dh.NgayDat,
+            //            TrangThai = dh.TrangThai,
+            //            TongTien = dh.TongTien,
+            //            KhachHang = kh
+            //        }).ToListAsync();
             var KetQua = await _context.DonHangs
-                .Join (_context.KhachHangs,
-                    dh => dh.KhachHangId,kh => kh.Id,
-                    (dh,kh) => new DonHang
-                    {
-                        Id = dh.Id,
-                        MaDon = dh.MaDon,
-                        KhachHangId = dh.KhachHangId,
-                        NgayDat = dh.NgayDat,
-                        TrangThai = dh.TrangThai,
-                        TongTien = dh.TongTien,
-                        KhachHang = kh
-                    }).ToListAsync();
+                                .Include(dh => dh.KhachHang)
+                                .Include(dh => dh.ChiTietDonHangs)
+                                    .ThenInclude(ctdh => ctdh.SanPham)
+                .ToListAsync(); //phải include thẳng trong object khách hàng của class đơn hàng
             return KetQua;
         }
 
@@ -112,6 +117,18 @@ namespace ShopApp.Services
                     TongChiTieu = g.Sum(dh => dh.TongTien)
                 })
                 .ToListAsync();
+            return KetQua;
+        }
+
+        public async Task<List<DonHang>> GetAll()
+        {
+
+            var KetQua = await _context.DonHangs.Include(dh=> dh.KhachHang).ToListAsync(); //phải include thẳng trong object khách hàng của class đơn hàng
+            foreach (var donHang in KetQua)
+            {
+                Console.WriteLine($"DonHang Id: {donHang.Id}, MaDon: {donHang.MaDon}, Ten Khạch Hang: {donHang.KhachHang.HoTen}");
+            }
+
             return KetQua;
         }
     }
