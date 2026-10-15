@@ -64,7 +64,7 @@ namespace ShopApp.Services
                         .Where(dh => dh.TrangThai != "da_huy")
                         .SelectMany(dh => dh.ChiTietDonHangs)
                         .GroupBy(ctdh => new { ctdh.SanPhamId, Ten = ctdh.SanPham.Ten, GiaBan = ctdh.SanPham.GiaBan })
-                        .Select(g => new SanPham
+                        .Select(g => new SanPhamDTO
                         {
                             Id = g.Key.SanPhamId,
                             Ten = g.Key.Ten,

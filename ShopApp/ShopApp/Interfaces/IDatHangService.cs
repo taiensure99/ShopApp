@@ -1,8 +1,12 @@
-﻿namespace ShopApp.Interfaces
+﻿using ShopApp.Models;
+
+namespace ShopApp.Interfaces
 {
     public interface IDatHangService
     {
         void DatHang(int sanPhamId, int khachHangId, int soLuong);
-        
+
+        Task<DonHang> DatHangHoanChinh(DatHangRequest request);
+
     }
 }

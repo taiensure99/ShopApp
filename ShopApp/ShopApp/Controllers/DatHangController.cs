@@ -11,9 +11,11 @@ namespace ShopApp.Controllers
     public class DatHangController : Controller
     {
         private readonly IDonHangService _donHangService;
-        public DatHangController(IDonHangService donHangService)
+        private readonly IDatHangService _datHangService;
+        public DatHangController(IDonHangService donHangService, IDatHangService datHangService)
         {
             _donHangService = donHangService;
+            _datHangService = datHangService;
         }
 
         [HttpPost]
@@ -28,6 +30,13 @@ namespace ShopApp.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpPost("dat-hang-hoan-chinh")]
+        public async Task<IActionResult> DatHangHoanChinh(DatHangRequest data)
+        {
+            var KetQua = await _datHangService.DatHangHoanChinh(data);
+            return Ok(KetQua);
         }
     }
 }

@@ -165,5 +165,11 @@ namespace ShopApp.Services
                 .ToListAsync();
             return result.SelectMany(x => x.TopSanPham).ToList();
         }
+
+        public async Task<SanPham> GetByStoreUseId(int id)
+        {
+            var ketqua = await _context.SanPhams.FromSqlRaw($"EXECUTE sp_LaySanPhamTheoId @SanPhamId={id}").ToListAsync();
+            return ketqua.FirstOrDefault();
+        }
     }
 }

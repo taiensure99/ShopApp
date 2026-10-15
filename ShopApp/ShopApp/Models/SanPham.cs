@@ -16,7 +16,6 @@ public partial class SanPham
     public string DanhMuc { get; set; } = null!;
 
     public bool IsActive { get; set; }
-    public int TongSoLuongBan { get; set; }
 
     public virtual ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; } = new List<ChiTietDonHang>();
 

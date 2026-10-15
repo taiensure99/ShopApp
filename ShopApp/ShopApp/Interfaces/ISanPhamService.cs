@@ -23,5 +23,7 @@ namespace ShopApp.Interfaces
         Task<DenSoDonHang> DemTheoDanhMucAsync();
         Task<List<SanPham>> TopDatNhatTheoDanhMucAsync();
 
+        Task<SanPham> GetByStoreUseId(int id);
+
     }
 }

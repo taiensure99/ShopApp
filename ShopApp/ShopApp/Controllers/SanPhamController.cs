@@ -43,6 +43,18 @@ namespace ShopApp.Controllers
             return Ok(sp);
         }
 
+        [HttpGet("lay-san-pham-store/{id}")]
+        public async Task<IActionResult> GetByStoreUseId(int id)
+        {
+            var sp = await _sanPhamService.GetByStoreUseId(id);
+            if (sp == null)
+            {
+                return NotFound(new { message = $"Không tìm thấy sản phẩm có ID = {id}" });
+            }
+
+            return Ok(sp);
+        }
+
 
         //[HttpGet("moi-nhat")]
         //public IActionResult GetMoiNhat()
