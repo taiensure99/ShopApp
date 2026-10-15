@@ -81,5 +81,31 @@ namespace ShopApp.Services
             return kq > 0;
 
         }
+
+        public async Task<List<KhachHang>> LayDonHangTheoKhachHang(int id)
+        {
+            var KetQua = await _context.KhachHangs
+                .Where(kh => kh.Id == id)
+                .Include(kh => kh.DonHangs.Where(dh => dh.TrangThai != "da_huy"))
+                .Select(kh => new KhachHang
+                {
+                    Id = kh.Id,
+                    HoTen = kh.HoTen,
+                    DonHangs = kh.DonHangs
+                        .Where(dh => dh.TrangThai != "da_huy")
+                        .Select(dh => new DonHang
+                        {
+                            Id = dh.Id,
+                            MaDon = dh.MaDon,
+                            KhachHangId = dh.KhachHangId,
+                            NgayDat = dh.NgayDat,
+                            TrangThai = dh.TrangThai,
+                            TongTien = dh.TongTien
+                        }).ToList()
+                })
+                .ToListAsync();
+
+            return KetQua;
+        }
     }
 }

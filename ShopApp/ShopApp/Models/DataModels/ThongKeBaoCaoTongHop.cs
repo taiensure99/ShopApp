@@ -23,4 +23,5 @@
         public string TrangThai { get; set; }
         public int SoLuong { get; set; }
     }
+
 }

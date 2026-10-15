@@ -47,9 +47,9 @@ namespace ShopApp.Controllers
         }
 
         [HttpGet("khach-hang-vip")]
-        public async Task<IActionResult> LayDanhSachKhachHangVIP()
+        public async Task<IActionResult> BaoCaoKhachHangVip([FromQuery] decimal nguongChiTieu)
         {
-            var danhSachKhachHangVIP = await _thongKeService.LayDanhSachKhachHangVIP();
+            var danhSachKhachHangVIP = await _thongKeService.BaoCaoKhachHangVip(nguongChiTieu);
             if (danhSachKhachHangVIP == null || !danhSachKhachHangVIP.Any())
             {
                 return NotFound(new { message = "Không có khách hàng VIP." });

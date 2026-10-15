@@ -107,5 +107,12 @@ namespace ShopApp.Controllers
             return Ok(kh);
         }
 
+        [HttpGet("theo-khach-hang/{id}")]
+        public async Task<IActionResult> LayDonHangTheoKhachHang(int id)
+        {
+            var ketQua = await _khachHangService.LayDonHangTheoKhachHang(id);
+            return Ok(ketQua);
+        }
+
     }
 }

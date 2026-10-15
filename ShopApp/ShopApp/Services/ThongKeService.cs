@@ -45,28 +45,40 @@ namespace ShopApp.Services
                 .ToListAsync();
             return KetQua;
         }
-        public async Task<List<ThongKeKhanhHangVip>> LayDanhSachKhachHangVIP()
+        public async Task<List<ThongKeKhanhHangVip>> BaoCaoKhachHangVip(decimal nguongChiTieu)
         {
-            var danhSachKhachHangVIP = await _context.DonHangs
-                .Where(dh => dh.TrangThai == "da_giao")
-                // SỬA LỖI TẠI ĐÂY: Giữ lại cả DonHang (dh) và KhachHang (kh) bằng một object vô danh (new { ... })
-                .Join(_context.KhachHangs,
-                dh => dh.KhachHangId, 
-                kh => kh.Id, (dh, kh) => new { DonHang = dh, KhachHang = kh })
-                // Group theo Id của Khách hàng
-                .GroupBy(x => x.KhachHang.Id)
-                .Select(g => new ThongKeKhanhHangVip
+            var ketQua = await _context.KhachHangs
+                .Include(kh => kh.DonHangs.Where(dh => dh.TrangThai != "da_huy"))
+                    .ThenInclude(dh => dh.ChiTietDonHangs)
+                        .ThenInclude(ctdh => ctdh.SanPham)
+                .AsSplitQuery()
+                .Select(kh => new ThongKeKhanhHangVip
                 {
-                    Id = g.Key,
-                    // SỬA LỖI TẠI ĐÂY: Trỏ chính xác vào x.DonHang để tính tổng tiền
-                    TongChiTieu = g.Sum(x => x.DonHang.TongTien),
-                    SoLuongDon = g.Count()
+                    Id = kh.Id,
+                    HoTen = kh.HoTen,
+                    SoLuongDon = kh.DonHangs.Count(dh => dh.TrangThai != "da_huy"),
+                    TongChiTieu = kh.DonHangs
+                        .Where(dh => dh.TrangThai != "da_huy")
+                        .Sum(dh => dh.TongTien),
+                    Top3SanPham = kh.DonHangs
+                        .Where(dh => dh.TrangThai != "da_huy")
+                        .SelectMany(dh => dh.ChiTietDonHangs)
+                        .GroupBy(ctdh => new { ctdh.SanPhamId, Ten = ctdh.SanPham.Ten, GiaBan = ctdh.SanPham.GiaBan })
+                        .Select(g => new SanPham
+                        {
+                            Id = g.Key.SanPhamId,
+                            Ten = g.Key.Ten,
+                            GiaBan = g.Key.GiaBan,
+                            TongSoLuongBan = g.Sum(x => x.SoLuong)
+                        })
+                        .OrderByDescending(sp => sp.TongSoLuongBan)
+                        .Take(3)
+                        .ToList()
                 })
-                .Where(kh => kh.TongChiTieu > 300000)
-                .OrderByDescending(kh => kh.TongChiTieu)
+                .Where(x => x.TongChiTieu > nguongChiTieu)
                 .ToListAsync();
 
-            return danhSachKhachHangVIP;
+            return ketQua;
         }
 
         public async Task<List<SanPhamBanChay>> LaySanPhamBanChay()

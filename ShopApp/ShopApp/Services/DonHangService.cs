@@ -173,15 +173,31 @@ namespace ShopApp.Services
             return donHang;
         }
 
-        public async Task<DonHang> DonHangKemChiTietSanPham(int id)
+        public async Task<List<DonHang>> DonHangKemChiTietSanPham(int id)
         {
             var donHang = await _context.DonHangs
-                .Where(dh => dh.Id == id)
-                .Include(dh => dh.KhachHang)
-                .Include(dh => dh.ChiTietDonHangs)
-                    .ThenInclude(ctdh => ctdh.SanPham)
-                .FirstOrDefaultAsync();
+                    .Where(dh => dh.Id == id)
+                    .Include(dh => dh.KhachHang)
+                    .Include(dh => dh.ChiTietDonHangs)
+                        .ThenInclude(ctdh => ctdh.SanPham)
+                    .AsSplitQuery()
+                    .Select(dh => new DonHang
+                    {
+                        Id = dh.Id,
+                        MaDon = dh.MaDon,
+                        KhachHangId = dh.KhachHangId,
+                        NgayDat = dh.NgayDat,
+                        TrangThai = dh.TrangThai,
+                        TongTien = dh.TongTien,
+                        KhachHang = dh.KhachHang,
+                        ChiTietDonHangs = dh.ChiTietDonHangs
+                    })
+                    .ToListAsync();
+            
+
             return donHang;
+
         }
+
     }
 }

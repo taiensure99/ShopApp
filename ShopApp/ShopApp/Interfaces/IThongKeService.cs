@@ -10,7 +10,7 @@ namespace ShopApp.Interfaces
         int DenSanPhamHetHang();
         Task<int> DemDonHangTheoTrangThai(string trangThai);
         Task<List<ThongKeThangNam>> TinhDoanhThuTheoThangNam(int nam);
-        Task<List<ThongKeKhanhHangVip>> LayDanhSachKhachHangVIP();
+        Task<List<ThongKeKhanhHangVip>> BaoCaoKhachHangVip(decimal nguongChiTieu);
         Task<List<SanPhamBanChay>> LaySanPhamBanChay();
         Task<ThongKeBaoCaoTongHop> LayBaoCaoTongHop();
     }

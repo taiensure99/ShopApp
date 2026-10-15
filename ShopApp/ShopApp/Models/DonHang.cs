@@ -20,5 +20,7 @@ public partial class DonHang
     public virtual ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; } = new List<ChiTietDonHang>();
 
     public virtual KhachHang KhachHang { get; set; } = null!; //navigate ngược lại  
-    
+
+    public virtual ChiTietDonHang ChiTietDonHang { get; set; } = null!;
+
 }

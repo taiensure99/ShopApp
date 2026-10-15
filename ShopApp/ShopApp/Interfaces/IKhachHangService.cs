@@ -15,5 +15,6 @@ namespace ShopApp.Interfaces
         KhachHang GetByEmail(string email);
         Task<bool> UpdateKhachHang(int id, KhachHang khachHang);
         Task<bool> DeleteKhachHang(int id);
+        Task<List<KhachHang>> LayDonHangTheoKhachHang(int id);
     }
 }
