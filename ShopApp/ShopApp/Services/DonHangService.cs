@@ -199,5 +199,12 @@ namespace ShopApp.Services
 
         }
 
+        public async Task<int> DeleteDonHang(int id)
+        {
+            var result = await _context.Database.ExecuteSqlRawAsync(
+                "EXEC sp_HuyDonHang @DonHangId = {0}", id);
+
+            return result;
+        }
     }
 }

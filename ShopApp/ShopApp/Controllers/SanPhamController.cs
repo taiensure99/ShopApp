@@ -31,16 +31,15 @@ namespace ShopApp.Controllers
         }
 
         // GET: api/SanPham/1
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        [HttpGet("Tim-theo-ten")]
+        public async Task<IActionResult> TimSanPhamTheoTen([FromQuery] string ten)
         {
-            var sp = await _sanPhamService.GetById(id);
-            if (sp == null)
+            var Kq = await _sanPhamService.TimSanPhamTheoTen(ten);
+            if (Kq == null || Kq.Count == 0)
             {
-                return NotFound(new { message = $"Không tìm thấy sản phẩm có ID = {id}" });
+                return NotFound(new { message = $"Không tìm thấy sản phẩm nào chứa từ khóa: {ten}" });
             }
-
-            return Ok(sp);
+            return Ok(Kq);
         }
 
         [HttpGet("lay-san-pham-store/{id}")]

@@ -22,6 +22,6 @@ namespace ShopApp.Interfaces
         Task<List<DonHang>> GetById(int id);
         Task<List<DonHang>> ChiTietDonHangKemKhachHang(int id);
         Task<List<DonHang>> DonHangKemChiTietSanPham(int id);
-
+        Task<int> DeleteDonHang(int id);
     }
 }

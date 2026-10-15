@@ -23,8 +23,10 @@ namespace ShopApp.Services
         }
         public async Task<SanPham> GetById(int id) //async await
         {
-
-            return await _context.SanPhams.FirstOrDefaultAsync(sp => sp.Id == id);
+            var sanPham = await _context.SanPhams
+                .FromSqlRaw($"EXECUTE sp_LaySanPhamTheoId @SanPhamId={id}")
+                .FirstOrDefaultAsync();
+            return sanPham;
         }
 
 
@@ -170,6 +172,13 @@ namespace ShopApp.Services
         {
             var ketqua = await _context.SanPhams.FromSqlRaw($"EXECUTE sp_LaySanPhamTheoId @SanPhamId={id}").ToListAsync();
             return ketqua.FirstOrDefault();
+        }
+
+        public async Task<List<SanPham>> TimSanPhamTheoTen(string ten)
+        {
+            return await _context.SanPhams
+                .FromSqlRaw("EXECUTE sp_TimSanPhamTheoTen @Ten = {0}", ten)
+                .ToListAsync();
         }
     }
 }

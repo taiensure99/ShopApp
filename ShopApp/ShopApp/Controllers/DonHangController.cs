@@ -157,6 +157,16 @@ namespace ShopApp.Controllers
             return Ok(KetQua);
         }
 
+        [HttpDelete("huy-don-hang")]
+        public async Task<IActionResult> HuyDonHang(int id)
+        {
+            var ketQua = await _donHangService.DeleteDonHang(id);
+            if (ketQua == 0)
+            {
+                return StatusCode(500, "Đã xảy ra lỗi khi hủy đơn hàng.");
+            }
+            return Ok("Hủy đơn hàng thành công");
+        }
 
     }
 }
