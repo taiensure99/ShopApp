@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using ShopApp.Interfaces;
 using ShopApp.Models;
 using ShopApp.Models.DataModels;
+using System.Data;
 
 namespace ShopApp.Services
 {
@@ -164,6 +166,66 @@ namespace ShopApp.Services
                 .Select(g => new { DanhMuc = g.Key, TopSanPham = g.OrderByDescending(sp => sp.GiaBan).Take(1) })
                 .ToListAsync();
             return result.SelectMany(x => x.TopSanPham).ToList();
+        }
+
+        public async Task<List<SanPhamTimKiemDto>> TimKiemNangCaoAsync(TimKiemSanPhamQuery query)
+        {
+            var danhSachThamSo = new List<string>();
+            var sqlParams = new List<SqlParameter>();
+
+            if (!string.IsNullOrWhiteSpace(query.TuKhoa))
+            {
+                danhSachThamSo.Add("@TuKhoa = @TuKhoa");
+                sqlParams.Add(new SqlParameter("@TuKhoa", SqlDbType.NVarChar, 200) { Value = query.TuKhoa });
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.DanhMuc))
+            {
+                danhSachThamSo.Add("@DanhMuc = @DanhMuc");
+                sqlParams.Add(new SqlParameter("@DanhMuc", SqlDbType.NVarChar, 100) { Value = query.DanhMuc });
+            }
+
+            if (query.GiaTu.HasValue)
+            {
+                danhSachThamSo.Add("@GiaTu = @GiaTu");
+                sqlParams.Add(new SqlParameter("@GiaTu", SqlDbType.Decimal) { Precision = 18, Scale = 2, Value = query.GiaTu.Value });
+            }
+
+            if (query.GiaDen.HasValue)
+            {
+                danhSachThamSo.Add("@GiaDen = @GiaDen");
+                sqlParams.Add(new SqlParameter("@GiaDen", SqlDbType.Decimal) { Precision = 18, Scale = 2, Value = query.GiaDen.Value });
+            }
+
+            if (query.ChiConHang.HasValue)
+            {
+                danhSachThamSo.Add("@ChiConHang = @ChiConHang");
+                sqlParams.Add(new SqlParameter("@ChiConHang", SqlDbType.Bit) { Value = query.ChiConHang.Value });
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.SapXepTheo))
+            {
+                danhSachThamSo.Add("@SapXepTheo = @SapXepTheo");
+                sqlParams.Add(new SqlParameter("@SapXepTheo", SqlDbType.NVarChar, 50) { Value = query.SapXepTheo });
+            }
+
+            if (query.ChieuTang.HasValue)
+            {
+                danhSachThamSo.Add("@ChieuTang = @ChieuTang");
+                sqlParams.Add(new SqlParameter("@ChieuTang", SqlDbType.Bit) { Value = query.ChieuTang.Value });
+            }
+
+            string sql = "EXEC dbo.sp_TimKiemSanPhamNangCao";
+            if (danhSachThamSo.Count > 0)
+            {
+                sql += " " + string.Join(", ", danhSachThamSo);
+            }
+
+            var ketQua = await _context.Database
+                .SqlQueryRaw<SanPhamTimKiemDto>(sql, sqlParams.ToArray())
+                .ToListAsync();
+
+            return ketQua;
         }
     }
 }
