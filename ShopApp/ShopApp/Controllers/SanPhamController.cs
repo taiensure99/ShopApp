@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShopApp.Interfaces;
 using ShopApp.Models;
+using ShopApp.Models.DataModels;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
@@ -263,6 +264,13 @@ namespace ShopApp.Controllers
         {
             var topSanPhams = await _sanPhamService.TopDatNhatTheoDanhMucAsync();
             return Ok(topSanPhams);
+        }
+
+        [HttpGet("tim-kiem-nang-cao")]
+        public async Task<IActionResult> TimKiemSanPhamNangCao([FromQuery] TimKiemSanPhamQuery query)
+        {
+            var ketQua = await _sanPhamService.TimKiemNangCaoAsync(query);
+            return Ok(ketQua);
         }
     }
 

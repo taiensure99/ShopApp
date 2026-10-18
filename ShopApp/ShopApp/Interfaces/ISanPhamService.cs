@@ -26,6 +26,7 @@ namespace ShopApp.Interfaces
         Task<SanPham> GetByStoreUseId(int id);
 
         Task<List<SanPham>> TimSanPhamTheoTen(string ten);
+        Task<List<SanPhamTimKiemDto>> TimKiemNangCaoAsync(TimKiemSanPhamQuery query);
 
     }
 }
