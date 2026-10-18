@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShopApp.Interfaces;
 using ShopApp.Models;
+using ShopApp.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,42 +10,42 @@ namespace ShopApp.Services
 {
     public class KhachHangService : IKhachHangService
     {
-        private readonly ShopAppDbContext _context;
-        public KhachHangService(ShopAppDbContext context)
+        private readonly IKhachHangRepository _repository;
+        public KhachHangService(IKhachHangRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         public bool KiemTraEmailTonTai(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) return false;
-            return _context.KhachHangs.Any(k => k.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+            return _repository.Get().Any(k => k.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
         }
 
-        public int DemTongKhach() => _context.KhachHangs.Count();
+        public int DemTongKhach() => _repository.Get().Count();
 
         public async Task<bool> ThemKhachHang(KhachHang khachHang)
         {
-            _context.KhachHangs.Add(khachHang);
-            var kq = await _context.SaveChangesAsync();
+            await _repository.AddAsync(khachHang);
+            var kq = await _repository.SaveChangesAsync();
             return kq > 0;
         }
 
         public async Task<List<KhachHang>> GetAll()
         {
-            return await _context.KhachHangs.ToListAsync();
+            return await _repository.GetAllAsync();
         }
 
         public async Task<KhachHang> GetById(int id)
         {
-            return await _context.KhachHangs.FirstOrDefaultAsync(k => k.Id == id);
+            return await _repository.GetByIdAsync(id);
         }
 
         public async Task<List<KhachHang>       > TimKiemTheoTen(string ten)
         {
-            if (string.IsNullOrWhiteSpace(ten)) return _context.KhachHangs.ToList();
+            if (string.IsNullOrWhiteSpace(ten)) return await _repository.GetAllAsync();
 
-            return _context.KhachHangs
+            return _repository.Get()
                 .Where(k => k.HoTen != null &&
                             k.HoTen.Contains(ten, StringComparison.OrdinalIgnoreCase))
                 .ToList();
@@ -53,38 +54,38 @@ namespace ShopApp.Services
         public KhachHang GetByEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) return null;
-            return _context.KhachHangs.FirstOrDefault(
+            return _repository.Get().FirstOrDefault(
                 k => k.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<bool> UpdateKhachHang(int id, KhachHang khachHang)
         {
-            var existingKhachHang = await _context.KhachHangs.FindAsync(id);
+            var existingKhachHang = await _repository.GetByIdAsync(id);
             if (existingKhachHang == null) return false;
 
             existingKhachHang.HoTen = khachHang.HoTen;
             existingKhachHang.Email = khachHang.Email;
             // TODO: cập nhật thêm các field khác nếu có (SoDienThoai, DiaChi,...)
-
-            var kq = await _context.SaveChangesAsync();
+            _repository.Update(existingKhachHang);
+            var kq = await _repository.SaveChangesAsync();
             return kq > 0;
         }
         public async Task<bool> DeleteKhachHang(int id)
         {
-            var existingKhachHang = await _context.KhachHangs.FindAsync(id);
+            var existingKhachHang = await _repository.GetByIdAsync(id);
             if (existingKhachHang == null)
             {
                 throw new ArgumentException($"Không tìm thấy khách hàng Id={id}");
             }
-            _context.KhachHangs.Remove(existingKhachHang);
-            var kq = await _context.SaveChangesAsync(); 
+            _repository.Remove(existingKhachHang);
+            var kq = await _repository.SaveChangesAsync();
             return kq > 0;
 
         }
 
         public async Task<List<KhachHang>> LayDonHangTheoKhachHang(int id)
         {
-            var KetQua = await _context.KhachHangs
+            var KetQua = await _repository.Get()
                 .Where(kh => kh.Id == id)
                 .Include(kh => kh.DonHangs.Where(dh => dh.TrangThai != "da_huy"))
                 .Select(kh => new KhachHang

@@ -4,5 +4,6 @@ namespace ShopApp.Repositories.Interfaces
 {
     public interface ISanPhamRepository : IRepository<SanPham>
     {
+
     }
 }
