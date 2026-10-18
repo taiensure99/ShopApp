@@ -266,12 +266,12 @@ namespace ShopApp.Controllers
             return Ok(topSanPhams);
         }
 
-        [HttpGet("tim-kiem-nang-cao")]
-        public async Task<IActionResult> TimKiemSanPhamNangCao([FromQuery] TimKiemSanPhamQuery query)
-        {
-            var ketQua = await _sanPhamService.TimKiemNangCaoAsync(query);
-            return Ok(ketQua);
-        }
+        //[HttpGet("tim-kiem-nang-cao")]
+        //public async Task<IActionResult> TimKiemSanPhamNangCao([FromQuery] TimKiemSanPhamQuery query)
+        //{
+        //    var ketQua = await _sanPhamService.TimKiemNangCaoAsync(query);
+        //    return Ok(ketQua);
+        //}
     }
 
 

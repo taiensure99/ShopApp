@@ -17,7 +17,7 @@ namespace ShopApp.Interfaces
         Task<bool> DeleteSanPham(int id);
         Task<List<SanPham>> LocAsync(string? danhMuc, decimal? giaToiDa);
         Task<Dictionary<string, int>> ThongKeTheoDanhMucAsync();
-        Task<bool> ChuyenSanPhamGiuaDanhMucAsync(int spId1, int spId2);
+        //Task<bool> ChuyenSanPhamGiuaDanhMucAsync(int spId1, int spId2);
         Task<List<SanPham>> LocGiaAsync(decimal giamin, decimal giamax);
         Task<List<SanPham>> DanhSachRutGonAsync();
         Task<DenSoDonHang> DemTheoDanhMucAsync();
@@ -26,7 +26,7 @@ namespace ShopApp.Interfaces
         Task<SanPham> GetByStoreUseId(int id);
 
         Task<List<SanPham>> TimSanPhamTheoTen(string ten);
-        Task<List<SanPhamTimKiemDto>> TimKiemNangCaoAsync(TimKiemSanPhamQuery query);
+        //Task<List<SanPhamTimKiemDto>> TimKiemNangCaoAsync(TimKiemSanPhamQuery query);
 
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShopApp.Interfaces;
 using ShopApp.Models;
+using ShopApp.Repositories;
+using ShopApp.Repositories.Interfaces;
 using ShopApp.Services;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
@@ -13,6 +15,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 
 builder.Services.AddDbContext<ShopAppDbContext>(options => options.UseSqlServer(connectionString));
+
+//giúp các class ví dụ có repository đươc inject vào tat cả các controller, service, v.v. mà không cần phải khai báo từng cái một
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repositorty<>));
 
 
 builder.Services.AddCors(options =>
@@ -43,11 +48,14 @@ builder.Services.AddScoped<IThongKeService, ThongKeService>();
 builder.Services.AddTransient<IGuidService, GuidServiceTransient>();
 builder.Services.AddScoped<IGuidService, GuidServiceScoped>();
 builder.Services.AddSingleton<IGuidService, GuidServiceSingleton>();
+//Repository
+builder.Services.AddScoped<ISanPhamRepository, SanPhamRepository>();
+
+// Đăng ký các dịch vụ (Services) — học buổi 32
 builder.Services.AddScoped<IRateLimitService, RateLimitService>();
 builder.Services.AddScoped<IDonHangService, DonHangService>();
 builder.Services.AddScoped<IDatHangService, DatHangService>();
 builder.Services.AddScoped<IDanhGia, DanhGiaService>();
-// Đăng ký các dịch vụ (Services) — học buổi 32
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -55,6 +63,8 @@ builder.Services.AddScoped<IKhachHangService, KhachHangService>();
 builder.Services.AddScoped<ISanPhamKhuyenMaiService, SanPhamKhuyenMaiService>();
 builder.Services.AddScoped<IThongBaoService, ThongBaoConsoleService>();
 builder.Services.AddScoped<IThongBaoService, ThongBaoLogService>();
+
+
 
 
 
