@@ -11,10 +11,12 @@ namespace ShopApp.Controllers
     public class DonHangController : Controller
     {
         private readonly IDonHangService _donHangService;
+        private readonly IDatHangService _datHangService;
 
         public DonHangController(IDonHangService donHangService)
         {
             _donHangService = donHangService;
+            _datHangService = _datHangService;   
         }
 
         [HttpGet]
@@ -166,6 +168,20 @@ namespace ShopApp.Controllers
                 return StatusCode(500, "Đã xảy ra lỗi khi hủy đơn hàng.");
             }
             return Ok("Hủy đơn hàng thành công");
+        }
+
+        [HttpPost("dat-hang-uow")]
+        public async Task<IActionResult> DatHang([FromBody] DatHangRequest request)
+        {
+            try
+            {
+                var ketQua = await _datHangService.DatHangAsync(request);
+                return Ok(new { Message = "Đặt hàng thành công!", DonHangId = ketQua.Id, TongTien = ketQua.TongTien });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
         }
 
     }

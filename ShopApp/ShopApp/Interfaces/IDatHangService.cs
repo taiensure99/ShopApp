@@ -7,6 +7,7 @@ namespace ShopApp.Interfaces
         void DatHang(int sanPhamId, int khachHangId, int soLuong);
 
         Task<DonHang> DatHangHoanChinh(DatHangRequest request);
+        Task<DonHang> DatHangAsync(DatHangRequest request);
 
     }
 }

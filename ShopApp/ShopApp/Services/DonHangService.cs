@@ -3,16 +3,18 @@ using Microsoft.EntityFrameworkCore;
 using ShopApp.Interfaces;
 using ShopApp.Models;
 using ShopApp.Models.DataModels;
+using ShopApp.Repositories.Interfaces;
 using System.Security.AccessControl;
 
 namespace ShopApp.Services
 {
     public class DonHangService : IDonHangService
     {
-        private readonly ShopAppDbContext _context;
-        public DonHangService(ShopAppDbContext context)
+        private readonly IDonHangRepository _repository;
+
+        public DonHangService(IDonHangRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         public DonHang DatHang(DatHangRequest request)
@@ -27,88 +29,67 @@ namespace ShopApp.Services
                 return 0;
             }
 
-            return _context.DonHangs.Count(d => d.TrangThai != null &&
-                                        d.TrangThai.Trim().Equals(trangThai.Trim(), StringComparison.OrdinalIgnoreCase));
+            string status = trangThai.Trim().ToLower();
+            return _repository.Get()
+                              .Count(d => d.TrangThai != null && d.TrangThai.Trim().ToLower() == status);
         }
 
-        public int ThemDonHang(DonHang donHang)
-        {
-            throw new NotImplementedException();
-        }
-
-        DonHang IDonHangService.ThemDonHang(DonHang donHang)
+        public DonHang ThemDonHang(DonHang donHang)
         {
             throw new NotImplementedException();
         }
 
         public async Task<List<DonHang>> ChiTietDonHang()
         {
-            //var KetQua = await _context.DonHangs
-            //    .Join (_context.KhachHangs,
-            //        dh => dh.KhachHangId,kh => kh.Id,
-            //        (dh,kh) => new DonHang
-            //        {
-            //            Id = dh.Id,
-            //            MaDon = dh.MaDon,
-            //            KhachHangId = dh.KhachHangId,
-            //            NgayDat = dh.NgayDat,
-            //            TrangThai = dh.TrangThai,
-            //            TongTien = dh.TongTien,
-            //            KhachHang = kh
-            //        }).ToListAsync();
-            var KetQua = await _context.DonHangs
+            var ketQua = await _repository.Get()
                                 .Include(dh => dh.KhachHang)
                                 .Include(dh => dh.ChiTietDonHangs)
                                     .ThenInclude(ctdh => ctdh.SanPham)
-                .ToListAsync(); //phải include thẳng trong object khách hàng của class đơn hàng
-            return KetQua;
+                                .ToListAsync();
+            return ketQua;
         }
 
         public async Task<List<DonHang>> ChiTietDayDu()
         {
-            var KetQua = await _context.DonHangs
-                .Join(_context.KhachHangs,
-                    dh => dh.KhachHangId, kh => kh.Id,
-                    (dh, kh) => new { dh, kh }
-                    ).Join
-                (_context.ChiTietDonHangs,
-                    d => d.dh.Id, ctdh => ctdh.DonHangId,
-                    (d, ctdh) => new DonHang
-                    {
-                        Id = d.dh.Id,
-                        MaDon = d.dh.MaDon,
-                        KhachHangId = d.dh.KhachHangId,
-                        NgayDat = d.dh.NgayDat,
-                        TrangThai = d.dh.TrangThai,
-                        TongTien = d.dh.TongTien,
-                        KhachHang = d.kh,
-                        ChiTietDonHangs = new List<ChiTietDonHang> { ctdh }
-                    }).ToListAsync();
+            var ketQua = await _repository.Get()
+                .Include(dh => dh.KhachHang)
+                .Include(dh => dh.ChiTietDonHangs)
+                .SelectMany(dh => dh.ChiTietDonHangs, (dh, ctdh) => new DonHang
+                {
+                    Id = dh.Id,
+                    MaDon = dh.MaDon,
+                    KhachHangId = dh.KhachHangId,
+                    NgayDat = dh.NgayDat,
+                    TrangThai = dh.TrangThai,
+                    TongTien = dh.TongTien,
+                    KhachHang = dh.KhachHang,
+                    ChiTietDonHangs = new List<ChiTietDonHang> { ctdh }
+                }).ToListAsync();
 
-
-            return KetQua;
+            return ketQua;
         }
+
         public async Task<List<DonHangKhacHangDTO>> ChiTietDonHangKemTenKhach()
         {
-            var KetQua = await _context.DonHangs
-                .Join(_context.KhachHangs,
-                    dh => dh.KhachHangId, kh => kh.Id,
-                    (dh, kh) => new DonHangKhacHangDTO
-                    {
-                        Id = dh.Id,
-                        MaDon = dh.MaDon,
-                        KhachHangId = dh.KhachHangId,
-                        NgayDat = dh.NgayDat,
-                        TrangThai = dh.TrangThai,
-                        TongTien = dh.TongTien,
-                        TenKhachHang = kh.HoTen
-                    }).ToListAsync();
-            return KetQua;
+            var ketQua = await _repository.Get()
+                .Where(dh => dh.KhachHang != null)
+                .Select(dh => new DonHangKhacHangDTO
+                {
+                    Id = dh.Id,
+                    MaDon = dh.MaDon,
+                    KhachHangId = dh.KhachHangId,
+                    NgayDat = dh.NgayDat,
+                    TrangThai = dh.TrangThai,
+                    TongTien = dh.TongTien,
+                    TenKhachHang = dh.KhachHang.HoTen
+                }).ToListAsync();
+
+            return ketQua;
         }
 
         public async Task<List<ThongKeKhanhHangVip>> ThongKeTheoKhach()
         {
-            var KetQua = await _context.DonHangs
+            var ketQua = await _repository.Get()
                 .Where(dh => dh.TrangThai == "da_giao")
                 .GroupBy(dh => dh.KhachHangId)
                 .Select(g => new ThongKeKhanhHangVip
@@ -118,23 +99,28 @@ namespace ShopApp.Services
                     TongChiTieu = g.Sum(dh => dh.TongTien)
                 })
                 .ToListAsync();
-            return KetQua;
+
+            return ketQua;
         }
 
         public async Task<List<DonHang>> GetAll()
         {
+            var ketQua = await _repository.Get()
+                .Include(dh => dh.KhachHang)
+                .ToListAsync();
 
-            var KetQua = await _context.DonHangs.Include(dh => dh.KhachHang).ToListAsync(); //phải include thẳng trong object khách hàng của class đơn hàng
-            foreach (var donHang in KetQua)
+            foreach (var donHang in ketQua)
             {
-                Console.WriteLine($"DonHang Id: {donHang.Id}, MaDon: {donHang.MaDon}, Ten Khạch Hang: {donHang.KhachHang.HoTen}");
+                Console.WriteLine($"DonHang Id: {donHang.Id}, MaDon: {donHang.MaDon}, Ten Khach Hang: {donHang.KhachHang?.HoTen}");
             }
 
-            return KetQua;
+            return ketQua;
         }
+
         public async Task<List<DonHang>> GetById(int id)
         {
-            var donHang = await _context.DonHangs
+            var donHang = await _repository.Get()
+                .Where(dh => dh.Id == id) 
                 .Include(dh => dh.KhachHang)
                 .Select(dh => new DonHang
                 {
@@ -147,62 +133,63 @@ namespace ShopApp.Services
                     KhachHang = dh.KhachHang
                 })
                 .ToListAsync();
+
             return donHang;
-;
         }
 
         public async Task<List<DonHang>> ChiTietDonHangKemKhachHang(int id)
         {
-            var donHang = await _context.DonHangs
+            var donHang = await _repository.Get()
                 .Where(dh => dh.Id == id)
                 .Include(dh => dh.KhachHang)
                 .Include(dh => dh.ChiTietDonHangs)
                     .ThenInclude(ctdh => ctdh.SanPham)
-                    .Select(dh => new DonHang
-                    {
-                        Id = dh.Id,
-                        MaDon = dh.MaDon,
-                        KhachHangId = dh.KhachHangId,
-                        NgayDat = dh.NgayDat,
-                        TrangThai = dh.TrangThai,
-                        TongTien = dh.TongTien,
-                        KhachHang = dh.KhachHang,
-                        ChiTietDonHangs = dh.ChiTietDonHangs
-                    })
+                .Select(dh => new DonHang
+                {
+                    Id = dh.Id,
+                    MaDon = dh.MaDon,
+                    KhachHangId = dh.KhachHangId,
+                    NgayDat = dh.NgayDat,
+                    TrangThai = dh.TrangThai,
+                    TongTien = dh.TongTien,
+                    KhachHang = dh.KhachHang,
+                    ChiTietDonHangs = dh.ChiTietDonHangs
+                })
                 .ToListAsync();
+
             return donHang;
         }
 
         public async Task<List<DonHang>> DonHangKemChiTietSanPham(int id)
         {
-            var donHang = await _context.DonHangs
-                    .Where(dh => dh.Id == id)
-                    .Include(dh => dh.KhachHang)
-                    .Include(dh => dh.ChiTietDonHangs)
-                        .ThenInclude(ctdh => ctdh.SanPham)
-                    .AsSplitQuery()
-                    .Select(dh => new DonHang
-                    {
-                        Id = dh.Id,
-                        MaDon = dh.MaDon,
-                        KhachHangId = dh.KhachHangId,
-                        NgayDat = dh.NgayDat,
-                        TrangThai = dh.TrangThai,
-                        TongTien = dh.TongTien,
-                        KhachHang = dh.KhachHang,
-                        ChiTietDonHangs = dh.ChiTietDonHangs
-                    })
-                    .ToListAsync();
-            
+            var donHang = await _repository.Get()
+                .Where(dh => dh.Id == id)
+                .Include(dh => dh.KhachHang)
+                .Include(dh => dh.ChiTietDonHangs)
+                    .ThenInclude(ctdh => ctdh.SanPham)
+                .AsSplitQuery()
+                .Select(dh => new DonHang
+                {
+                    Id = dh.Id,
+                    MaDon = dh.MaDon,
+                    KhachHangId = dh.KhachHangId,
+                    NgayDat = dh.NgayDat,
+                    TrangThai = dh.TrangThai,
+                    TongTien = dh.TongTien,
+                    KhachHang = dh.KhachHang,
+                    ChiTietDonHangs = dh.ChiTietDonHangs
+                })
+                .ToListAsync();
 
             return donHang;
-
         }
 
-        public async Task<int> DeleteDonHang(int id)
+
+        public async Task<int> DeleteDonHang(int id)    
         {
-            var result = await _context.Database.ExecuteSqlRawAsync(
-                "EXEC sp_HuyDonHang @DonHangId = {0}", id);
+            var result = await _repository.Get()
+                .Where(dh => dh.Id == id)
+                .ExecuteDeleteAsync();
 
             return result;
         }

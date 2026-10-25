@@ -51,6 +51,8 @@ builder.Services.AddSingleton<IGuidService, GuidServiceSingleton>();
 //Repository
 builder.Services.AddScoped<ISanPhamRepository, SanPhamRepository>();
 builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
+builder.Services.AddScoped<IDonHangRepository, DonHangRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Đăng ký các dịch vụ (Services) — học buổi 32
 builder.Services.AddScoped<IRateLimitService, RateLimitService>();

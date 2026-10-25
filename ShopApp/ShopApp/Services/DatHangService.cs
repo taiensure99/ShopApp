@@ -1,72 +1,84 @@
-﻿using ShopApp.Models;
-using ShopApp.Services;
-using ShopApp.Interfaces;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using ShopApp.Interfaces;
+using ShopApp.Models;
+using ShopApp.Models.DataModels;
+using ShopApp.Repositories.Interfaces;
+
 namespace ShopApp.Services
 {
     public class DatHangService : IDatHangService
     {
-        private readonly IKhachHangService _khachHangService;
-        private readonly ISanPhamService _sanPhamService;
-        private readonly IDonHangService _donHangService;
-        private readonly ShopAppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public DatHangService(ShopAppDbContext context,
-            IKhachHangService khachHangService,
-            ISanPhamService sanPhamService,
-            IDonHangService donHangService)
+        public DatHangService(IUnitOfWork unitOfWork)
         {
-            _khachHangService = khachHangService;
-            _sanPhamService = sanPhamService;
-            _donHangService = donHangService;
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
-        public async Task DatHang(int sanPhamId, int khachHangId, int soLuong)
-        {
-            if (soLuong <= 0)
-            {
-                throw new ArgumentException("Số lượng phải lớn hơn 0.");
-            }
-            var TongTien = await _sanPhamService.TinhTongTien(sanPhamId, soLuong);
-            var DonHangMoi = new DonHang
-            {
-                MaDon = Guid.NewGuid().ToString(),
-                TongTien =TongTien,
-                TrangThai = "cho_xac_nhan",
-                NgayDat = DateTime.Now
-            };
-            _donHangService.ThemDonHang(DonHangMoi);
-        
-        }
-
-        void IDatHangService.DatHang(int sanPhamId, int khachHangId, int soLuong)
+        public void DatHang(int sanPhamId, int khachHangId, int soLuong)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<DonHang> DatHangHoanChinh(DatHangRequest request)
+        public async Task<DonHang> DatHangAsync(DatHangRequest request)
         {
-            var khachHangId = new SqlParameter("@KhachHangId", request.KhachHangId);
-            var soLuong = new SqlParameter("@SoLuong", request.SoLuong);
-            var sanPhamId = new SqlParameter("@SanPhamId", request.SanPhamId);
 
-            var donHangIdOutPut = new SqlParameter
+            bool khachHangTonTai = await _unitOfWork.KhachHangRepository.Exits(request.KhachHangId);
+            if (!khachHangTonTai)
             {
-                ParameterName = "@DonHangId",
-                SqlDbType = System.Data.SqlDbType.Int,
-                Direction = System.Data.ParameterDirection.Output
+                throw new Exception($"Khách hàng có ID = {request.KhachHangId} không tồn tại!");
+            }
+
+            if (request.DanhSachSanPham == null || !request.DanhSachSanPham.Any())
+            {
+                throw new Exception("Danh sách sản phẩm đặt mua không được để trống!");
+            }
+
+            var donHangMoi = new DonHang
+            {
+                MaDon = $"DH-{DateTime.Now:yyyyMMddHHmmss}",
+                KhachHangId = request.KhachHangId,
+                NgayDat = DateTime.Now,
+                TrangThai = "cho_xu_ly",
+                TongTien = 0,
+                ChiTietDonHangs = new List<ChiTietDonHang>()
             };
 
-            await _context.Database.ExecuteSqlRawAsync("EXEC sp_DatHangHoanChinh @KhachHangId, @SanPhamId, @SoLuong, @DonHangId OUTPUT",
-                khachHangId, sanPhamId, soLuong, donHangIdOutPut);
-            int donHangId = (int)donHangIdOutPut.Value;
+            foreach (var item in request.DanhSachSanPham)
+            {
+                var sanPham = await _unitOfWork.SanPhamRepository.GetByIdAsync(item.SanPhamId);
+                if (sanPham == null)
+                {
+                    throw new Exception($"Sản phẩm có ID = {item.SanPhamId} không tồn tại!");
+                }
 
-            var kq = await _context.DonHangs.FirstOrDefaultAsync(dh => dh.Id == donHangId);
+                if (sanPham.TonKho < item.SoLuong)
+                {
+                    throw new Exception($"Sản phẩm '{sanPham.Ten}' không đủ hàng (Tồn kho: {sanPham.TonKho}, Yêu cầu: {item.SoLuong})!");
+                }
 
+                sanPham.TonKho -= item.SoLuong;
+                _unitOfWork.SanPhamRepository.Update(sanPham);
 
-            return kq;
+                var chiTiet = new ChiTietDonHang
+                {
+                    SanPhamId = sanPham.Id,
+                    SoLuong = item.SoLuong,
+                    DonGia = sanPham.GiaBan
+                };
+
+                donHangMoi.ChiTietDonHangs.Add(chiTiet);
+                donHangMoi.TongTien += sanPham.GiaBan * item.SoLuong;
+            }
+
+            await _unitOfWork.DonHangRepository.AddAsync(donHangMoi);
+            await _unitOfWork.SaveChangesAsync();
+
+            return donHangMoi;
+        }
+
+        public Task<DonHang> DatHangHoanChinh(DatHangRequest request)
+        {
+            throw new NotImplementedException();
         }
     }
 }
