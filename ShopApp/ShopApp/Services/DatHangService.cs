@@ -7,11 +7,15 @@ namespace ShopApp.Services
 {
     public class DatHangService : IDatHangService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IRepository<DonHang> _donHangRepo;
+        private readonly IRepository<SanPham> _sanPhamRepo;
+        private readonly IRepository<KhachHang> _khachHangRepo;
 
         public DatHangService(IUnitOfWork unitOfWork)
         {
-            _unitOfWork = unitOfWork;
+            _donHangRepo = unitOfWork.DonHangRepository;
+            _sanPhamRepo = unitOfWork.SanPhamRepository;
+            _khachHangRepo = unitOfWork.KhachHangRepository;
         }
 
         public void DatHang(int sanPhamId, int khachHangId, int soLuong)
@@ -22,7 +26,7 @@ namespace ShopApp.Services
         public async Task<DonHang> DatHangAsync(DatHangRequest request)
         {
 
-            bool khachHangTonTai = await _unitOfWork.KhachHangRepository.Exits(request.KhachHangId);
+            bool khachHangTonTai = await _khachHangRepo.Exits(request.KhachHangId);
             if (!khachHangTonTai)
             {
                 throw new Exception($"Khách hàng có ID = {request.KhachHangId} không tồn tại!");
@@ -45,7 +49,7 @@ namespace ShopApp.Services
 
             foreach (var item in request.DanhSachSanPham)
             {
-                var sanPham = await _unitOfWork.SanPhamRepository.GetByIdAsync(item.SanPhamId);
+                var sanPham = await _sanPhamRepo.GetByIdAsync(item.SanPhamId);
                 if (sanPham == null)
                 {
                     throw new Exception($"Sản phẩm có ID = {item.SanPhamId} không tồn tại!");
@@ -57,7 +61,7 @@ namespace ShopApp.Services
                 }
 
                 sanPham.TonKho -= item.SoLuong;
-                _unitOfWork.SanPhamRepository.Update(sanPham);
+                _sanPhamRepo.Update(sanPham);
 
                 var chiTiet = new ChiTietDonHang
                 {
@@ -70,8 +74,8 @@ namespace ShopApp.Services
                 donHangMoi.TongTien += sanPham.GiaBan * item.SoLuong;
             }
 
-            await _unitOfWork.DonHangRepository.AddAsync(donHangMoi);
-            await _unitOfWork.SaveChangesAsync();
+            await _donHangRepo.AddAsync(donHangMoi);
+            await _donHangRepo.SaveChangesAsync();
 
             return donHangMoi;
         }

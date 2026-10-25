@@ -8,7 +8,5 @@ namespace ShopApp.Repositories.Interfaces
         IRepository<SanPham> SanPhamRepository { get; }
         IRepository<DonHang> DonHangRepository { get; }
         IRepository<KhachHang> KhachHangRepository { get; }
-
-        Task<int> SaveChangesAsync();
     }
 }
