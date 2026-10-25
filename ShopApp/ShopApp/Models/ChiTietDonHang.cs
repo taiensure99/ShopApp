@@ -18,5 +18,4 @@ public partial class ChiTietDonHang
     public virtual DonHang DonHang { get; set; } = null!;
 
     public virtual SanPham SanPham { get; set; } = null!;
-
 }

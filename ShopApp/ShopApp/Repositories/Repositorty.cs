@@ -16,7 +16,7 @@ namespace ShopApp.Repositories
 
         public IQueryable<T> Get()
         {
-            return _dbSet.AsQueryable(); //nee la san pham moi laf _context.sanphams.......
+            return _dbSet.AsQueryable(); 
         }
 
         public IQueryable<T> FromSqlRaw(string sql,params object[] parameters)

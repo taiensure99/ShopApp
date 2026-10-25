@@ -11,21 +11,22 @@ namespace ShopApp.Services
 {
     public class SanPhamService : ISanPhamService
     {
-        private readonly ISanPhamRepository _repository;
+        private readonly IRepository<SanPham> _sanPhamRepo;
 
-        public SanPhamService(ISanPhamRepository repository)
+        public SanPhamService(IUnitOfWork unitOfWork)
         {
-            _repository = repository;
+            _sanPhamRepo = unitOfWork.SanPhamRepository;
         }
+
 
         public async Task<bool> KiemTraTonTai(int id)
         {
-            bool tonTai = await _repository.Exits(id);
+            bool tonTai = await _sanPhamRepo.Exits(id);
             return tonTai;
         }
         public async Task<SanPham> GetById(int id) //async await
         {
-            var sanPham = await _repository.FromSqlRaw($"EXECUTE sp_LaySanPhamTheoId @SanPhamId={id}")
+            var sanPham = await _sanPhamRepo.FromSqlRaw($"EXECUTE sp_LaySanPhamTheoId @SanPhamId={id}")
                 .FirstOrDefaultAsync();
             return sanPham;
         }
@@ -33,7 +34,7 @@ namespace ShopApp.Services
 
         public async Task<decimal> TinhTongTien(int sanPhamId, int soLuong)
         {
-            var sanPham = await GetById(sanPhamId); //async await => 1 luồng khác hoàng toàn ko chung luông với thằng này
+            var sanPham = await _sanPhamRepo.GetByIdAsync(sanPhamId); //async await => 1 luồng khác hoàng toàn ko chung luông với thằng này
 
             if (sanPham == null)
             {
@@ -44,19 +45,19 @@ namespace ShopApp.Services
 
         public async Task<List<SanPham>> GetAllSanPham()
         {
-            return await _repository.GetAllAsync();
+            return await _sanPhamRepo.GetAllAsync();
         }
 
         public async Task<bool> CreateSanPham(SanPham sanPham)
         {
-            await _repository.AddAsync(sanPham);
-            var kq = await _repository.SaveChangesAsync(); //cập nhất xuống db thành công thì kq >0 ngược lại thất bại kq = 0
+            await _sanPhamRepo.AddAsync(sanPham);
+            var kq = await _sanPhamRepo.SaveChangesAsync(); //cập nhất xuống db thành công thì kq >0 ngược lại thất bại kq = 0
             return kq > 0; //trả true false > 0 => thêm thành công  ngược thêm thất bại
         }
 
         public async Task<bool> UpdateSanPham(int id, SanPham sanPham)
         {
-            var existingSanPham = await _repository.GetByIdAsync(id);
+            var existingSanPham = await _sanPhamRepo.GetByIdAsync(id);
             if (existingSanPham == null)
             {
                 throw new ArgumentException($"Không tìm thấy sản phẩm Id={id}");
@@ -66,26 +67,26 @@ namespace ShopApp.Services
             existingSanPham.TonKho = sanPham.TonKho;
             existingSanPham.DanhMuc = sanPham.DanhMuc;
             existingSanPham.IsActive = sanPham.IsActive;
-            _repository.Update(existingSanPham);
-            var kq = await _repository.SaveChangesAsync(); //cập nhất xuống db thành công thì kq >0 ngược lại thất bại kq = 0
+            _sanPhamRepo.Update(existingSanPham);
+            var kq = await _sanPhamRepo.SaveChangesAsync(); //cập nhất xuống db thành công thì kq >0 ngược lại thất bại kq = 0
             return kq > 0; //trả true false > 0 => thêm thành công  ngược thêm thất bại
         }
 
         public async Task<bool> DeleteSanPham(int id)
         {
-            var existingSanPham = await _repository.GetByIdAsync(id);
+            var existingSanPham = await _sanPhamRepo.GetByIdAsync(id);
             if (existingSanPham == null)
             {
                 throw new ArgumentException($"Không tìm thấy sản phẩm Id={id}");
             }
-            _repository.Remove(existingSanPham);
-            var kq = await _repository.SaveChangesAsync(); //cập nhất xuống db thành công thì kq >0 ngược lại thất bại kq = 0
+            _sanPhamRepo.Remove(existingSanPham);
+            var kq = await _sanPhamRepo.SaveChangesAsync(); //cập nhất xuống db thành công thì kq >0 ngược lại thất bại kq = 0
             return kq > 0; //trả true false > 0 => thêm thành công  ngược thêm thất bại
         }
 
         public async Task<List<SanPham>> LocAsync(string danhMuc, decimal? giaToiDa)
         {
-            var query = _repository.Get();
+            var query = _sanPhamRepo.Get();
             if (!string.IsNullOrEmpty(danhMuc))
             {
                 query = query.Where(sp => sp.DanhMuc == danhMuc);
@@ -99,7 +100,7 @@ namespace ShopApp.Services
 
         public async Task<Dictionary<string, int>> ThongKeTheoDanhMucAsync()
         {
-            var result = await _repository.Get()
+            var result = await _sanPhamRepo.Get()
                 .GroupBy(sp => sp.DanhMuc)
                 .Select(g => new { DanhMuc = g.Key, SoLuong = g.Count() })
                 .ToDictionaryAsync(x => x.DanhMuc, x => x.SoLuong);
@@ -133,7 +134,7 @@ namespace ShopApp.Services
 
         public async Task<List<SanPham>> LocGiaAsync(decimal giamin, decimal giamax)
         {
-            var query = _repository.Get();
+            var query = _sanPhamRepo.Get();
             query = query.Where(sp => sp.GiaBan >= giamin && sp.GiaBan <= giamax).OrderBy(sp => sp.GiaBan);
             return await query.ToListAsync();
             //var List = await _context.SanPhams.Where(sp => sp.GiaBan >= giamin && sp.GiaBan <= giamax).OrderBy(sp => sp.GiaBan).ToListAsync();
@@ -142,7 +143,7 @@ namespace ShopApp.Services
 
         public async Task<List<SanPham>> DanhSachRutGonAsync()
         {
-            return await _repository.Get().Select(sp => new SanPham
+            return await _sanPhamRepo.Get().Select(sp => new SanPham
             {
                 Id = sp.Id,
                 Ten = sp.Ten,
@@ -151,7 +152,7 @@ namespace ShopApp.Services
         }
         public async Task<DenSoDonHang> DemTheoDanhMucAsync()
         {
-            var result = await _repository.Get()
+            var result = await _sanPhamRepo.Get()
                 .GroupBy(sp => sp.DanhMuc)
                 .Select(g => new { DanhMuc = g.Key, SoLuong = g.Count() })
                 .ToListAsync();
@@ -163,7 +164,7 @@ namespace ShopApp.Services
         }
         public async Task<List<SanPham>> TopDatNhatTheoDanhMucAsync()
         {
-            var result = await _repository.Get()
+            var result = await _sanPhamRepo.Get()
                 .GroupBy(sp => sp.DanhMuc)
                 .Select(g => new { DanhMuc = g.Key, TopSanPham = g.OrderByDescending(sp => sp.GiaBan).Take(1) })
                 .ToListAsync();
@@ -172,13 +173,13 @@ namespace ShopApp.Services
 
         public async Task<SanPham> GetByStoreUseId(int id)
         {
-            var ketqua = await _repository.FromSqlRaw($"EXECUTE sp_LaySanPhamTheoId @SanPhamId={id}").ToListAsync();
+            var ketqua = await  _sanPhamRepo.FromSqlRaw($"EXECUTE sp_LaySanPhamTheoId @SanPhamId={id}").ToListAsync();
             return ketqua.FirstOrDefault();
         }
 
         public async Task<List<SanPham>> TimSanPhamTheoTen(string ten)
         {
-            return await _repository
+            return await _sanPhamRepo
                 .FromSqlRaw("EXECUTE sp_TimSanPhamTheoTen @Ten = {0}", ten)
                 .ToListAsync();
 

@@ -4,17 +4,18 @@ using ShopApp.Interfaces;
 using ShopApp.Models;
 using ShopApp.Models.DataModels;
 using ShopApp.Repositories.Interfaces;
-using System.Security.AccessControl;
 
 namespace ShopApp.Services
 {
     public class DonHangService : IDonHangService
     {
-        private readonly IDonHangRepository _repository;
+        private readonly IRepository<DonHang> _DonHangRepo;
+        private readonly IRepository<KhachHang> _khachHangRepo;
 
-        public DonHangService(IDonHangRepository repository)
+        public DonHangService(IUnitOfWork unitOfWork)
         {
-            _repository = repository;
+            _DonHangRepo = unitOfWork.DonHangRepository;
+            _khachHangRepo = unitOfWork.KhachHangRepository;
         }
 
         public DonHang DatHang(DatHangRequest request)
@@ -30,7 +31,7 @@ namespace ShopApp.Services
             }
 
             string status = trangThai.Trim().ToLower();
-            return _repository.Get()
+            return _DonHangRepo.Get()
                               .Count(d => d.TrangThai != null && d.TrangThai.Trim().ToLower() == status);
         }
 
@@ -41,7 +42,7 @@ namespace ShopApp.Services
 
         public async Task<List<DonHang>> ChiTietDonHang()
         {
-            var ketQua = await _repository.Get()
+            var ketQua = await _DonHangRepo.Get()
                                 .Include(dh => dh.KhachHang)
                                 .Include(dh => dh.ChiTietDonHangs)
                                     .ThenInclude(ctdh => ctdh.SanPham)
@@ -51,7 +52,7 @@ namespace ShopApp.Services
 
         public async Task<List<DonHang>> ChiTietDayDu()
         {
-            var ketQua = await _repository.Get()
+            var ketQua = await _DonHangRepo.Get()
                 .Include(dh => dh.KhachHang)
                 .Include(dh => dh.ChiTietDonHangs)
                 .SelectMany(dh => dh.ChiTietDonHangs, (dh, ctdh) => new DonHang
@@ -71,9 +72,13 @@ namespace ShopApp.Services
 
         public async Task<List<DonHangKhacHangDTO>> ChiTietDonHangKemTenKhach()
         {
-            var ketQua = await _repository.Get()
-                .Where(dh => dh.KhachHang != null)
-                .Select(dh => new DonHangKhacHangDTO
+            var DonHangs =  _DonHangRepo.Get();
+            var KhachHangs =  _khachHangRepo.Get();
+
+            var ketQua = await DonHangs.Join(KhachHangs,
+                dh => dh.KhachHangId,
+                kh => kh.Id,
+                (dh, kh) => new DonHangKhacHangDTO
                 {
                     Id = dh.Id,
                     MaDon = dh.MaDon,
@@ -81,15 +86,14 @@ namespace ShopApp.Services
                     NgayDat = dh.NgayDat,
                     TrangThai = dh.TrangThai,
                     TongTien = dh.TongTien,
-                    TenKhachHang = dh.KhachHang.HoTen
+                    TenKhachHang = kh.HoTen
                 }).ToListAsync();
-
             return ketQua;
         }
 
         public async Task<List<ThongKeKhanhHangVip>> ThongKeTheoKhach()
         {
-            var ketQua = await _repository.Get()
+            var ketQua = await _DonHangRepo.Get()
                 .Where(dh => dh.TrangThai == "da_giao")
                 .GroupBy(dh => dh.KhachHangId)
                 .Select(g => new ThongKeKhanhHangVip
@@ -105,7 +109,7 @@ namespace ShopApp.Services
 
         public async Task<List<DonHang>> GetAll()
         {
-            var ketQua = await _repository.Get()
+            var ketQua = await  _DonHangRepo.Get()
                 .Include(dh => dh.KhachHang)
                 .ToListAsync();
 
@@ -119,7 +123,7 @@ namespace ShopApp.Services
 
         public async Task<List<DonHang>> GetById(int id)
         {
-            var donHang = await _repository.Get()
+            var donHang = await _DonHangRepo.Get()
                 .Where(dh => dh.Id == id) 
                 .Include(dh => dh.KhachHang)
                 .Select(dh => new DonHang
@@ -139,7 +143,7 @@ namespace ShopApp.Services
 
         public async Task<List<DonHang>> ChiTietDonHangKemKhachHang(int id)
         {
-            var donHang = await _repository.Get()
+            var donHang = await _DonHangRepo.Get()
                 .Where(dh => dh.Id == id)
                 .Include(dh => dh.KhachHang)
                 .Include(dh => dh.ChiTietDonHangs)
@@ -162,7 +166,7 @@ namespace ShopApp.Services
 
         public async Task<List<DonHang>> DonHangKemChiTietSanPham(int id)
         {
-            var donHang = await _repository.Get()
+            var donHang = await _DonHangRepo.Get()
                 .Where(dh => dh.Id == id)
                 .Include(dh => dh.KhachHang)
                 .Include(dh => dh.ChiTietDonHangs)
@@ -187,7 +191,7 @@ namespace ShopApp.Services
 
         public async Task<int> DeleteDonHang(int id)    
         {
-            var result = await _repository.Get()
+            var result = await _DonHangRepo.Get()
                 .Where(dh => dh.Id == id)
                 .ExecuteDeleteAsync();
 
