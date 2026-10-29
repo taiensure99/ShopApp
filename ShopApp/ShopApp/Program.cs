@@ -6,6 +6,10 @@ using ShopApp.Repositories.Interfaces;
 using ShopApp.Services;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.OpenApi.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +52,7 @@ builder.Services.AddScoped<IThongKeService, ThongKeService>();
 builder.Services.AddTransient<IGuidService, GuidServiceTransient>();
 builder.Services.AddScoped<IGuidService, GuidServiceScoped>();
 builder.Services.AddSingleton<IGuidService, GuidServiceSingleton>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 //Repository
 builder.Services.AddScoped<ISanPhamRepository, SanPhamRepository>();
 builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
@@ -61,14 +66,52 @@ builder.Services.AddScoped<IDatHangService, DatHangService>();
 builder.Services.AddScoped<IDanhGia, DanhGiaService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
 builder.Services.AddScoped<IKhachHangService, KhachHangService>();
 builder.Services.AddScoped<ISanPhamKhuyenMaiService, SanPhamKhuyenMaiService>();
 builder.Services.AddScoped<IThongBaoService, ThongBaoConsoleService>();
 builder.Services.AddScoped<IThongBaoService, ThongBaoLogService>();
 
+builder.Services
+      .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+      .AddJwtBearer(options =>
+      {
+          options.TokenValidationParameters = new TokenValidationParameters
+          {
+              ValidateIssuer = true,
+              ValidateAudience = true,
+              ValidateLifetime = true,
+              ValidateIssuerSigningKey = true,
+              ValidIssuer = builder.Configuration["Jwt:Issuer"],
+              ValidAudience = builder.Configuration["Jwt:Audience"],
+              IssuerSigningKey = new SymmetricSecurityKey(
+                  Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!)),
+              ClockSkew = TimeSpan.Zero      // hết hạn là hết, không cộng thêm 5 phút
+          };
+      });
+builder.Services.AddAuthorization();
 
-
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Dán token vào ô, KHÔNG gõ chữ Bearer"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+      {
+          {
+              new OpenApiSecurityScheme
+              { Reference = new OpenApiReference
+                  { Type = ReferenceType.SecurityScheme, Id = "Bearer" } },
+              Array.Empty<string>()
+          }
+      });
+});
 
 
 var app = builder.Build();
@@ -132,7 +175,8 @@ app.Use(async (context, next) =>
 
 
 
-
+app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.UseCors("AllowSwagger");

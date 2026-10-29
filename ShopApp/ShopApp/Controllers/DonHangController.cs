@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ShopApp.Interfaces;
 using ShopApp.Models;
 using ShopApp.Services;
@@ -7,6 +8,7 @@ namespace ShopApp.Controllers
 
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class DonHangController : Controller
     {
@@ -132,6 +134,8 @@ namespace ShopApp.Controllers
             var KetQua = await _donHangService.ChiTietDonHang();
             return Ok(KetQua);
         }
+
+        [AllowAnonymous]
         [HttpGet("kem-ten-khach")]
         public async Task<IActionResult> ChiTietDonHangKemTenKhach()
         {

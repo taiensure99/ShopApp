@@ -136,6 +136,8 @@ public partial class ShopAppDbContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false);
             entity.Property(e => e.HoTen).HasMaxLength(100);
+            entity.Property(e => e.MatKhau).HasMaxLength(200);
+            entity.Property(e => e.VaiTro).HasMaxLength(30);
             entity.Property(e => e.NgayDangKy)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
