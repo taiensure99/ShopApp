@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
+using System.Security.Claims;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -89,7 +90,19 @@ builder.Services
               ClockSkew = TimeSpan.Zero      // hết hạn là hết, không cộng thêm 5 phút
           };
       });
-builder.Services.AddAuthorization();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ChiAdmin", p => p.RequireRole("Admin"));
+
+    options.AddPolicy("NhanVienTroLen", p =>
+        p.RequireRole("Admin", "NhanVien"));      // OR: 1 trong 2 role
+
+    options.AddPolicy("AdminHoacChuDon", p => p.RequireAssertion(ctx =>
+        ctx.User.IsInRole("Admin")
+        || ctx.User.HasClaim(c => c.Type == ClaimTypes.NameIdentifier)));
+});
+
 
 builder.Services.AddSwaggerGen(c =>
 {

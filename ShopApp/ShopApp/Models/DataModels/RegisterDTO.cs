@@ -17,10 +17,12 @@ namespace ShopApp.Models.DataModels
 
     public class AuthResponseDTO
     {
-        public string Token { get; set; } = "";
+        public string AccessToken { get; set; } = ""; //access token
         public DateTime HetHan { get; set; }
         public string Email { get; set; } = "";
         public string VaiTro { get; set; } = "";
+        public string RefreshToken { get; set; } = "";
+
     }
 
 

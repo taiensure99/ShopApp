@@ -19,8 +19,6 @@ public partial class ShopAppDbContext : DbContext
 
     public virtual DbSet<DanhGiaSanPham> DanhGiaSanPhams { get; set; }
 
-    public virtual DbSet<DanhMuc> DanhMucs { get; set; }
-
     public virtual DbSet<DonHang> DonHangs { get; set; }
 
     public virtual DbSet<KhachHang> KhachHangs { get; set; }
@@ -30,6 +28,8 @@ public partial class ShopAppDbContext : DbContext
     public virtual DbSet<NhanVien> NhanViens { get; set; }
 
     public virtual DbSet<PhienDangNhap> PhienDangNhaps { get; set; }
+
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public virtual DbSet<SanPham> SanPhams { get; set; }
 
@@ -47,7 +47,7 @@ public partial class ShopAppDbContext : DbContext
     {
         modelBuilder.Entity<ChiTietDonHang>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ChiTietD__3214EC07907536D0");
+            entity.HasKey(e => e.Id).HasName("PK__ChiTietD__3214EC0758434E76");
 
             entity.ToTable("ChiTietDonHang", tb => tb.HasTrigger("trg_CapNhatTongTien"));
 
@@ -65,7 +65,7 @@ public partial class ShopAppDbContext : DbContext
 
         modelBuilder.Entity<DanhGiaSanPham>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DanhGiaS__3214EC0715D22732");
+            entity.HasKey(e => e.Id).HasName("PK__DanhGiaS__3214EC07D63C81EE");
 
             entity.ToTable("DanhGiaSanPham");
 
@@ -85,25 +85,13 @@ public partial class ShopAppDbContext : DbContext
                 .HasConstraintName("FK_DanhGia_SanPham");
         });
 
-        modelBuilder.Entity<DanhMuc>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__DanhMuc__3214EC2762C3DE40");
-
-            entity.ToTable("DanhMuc");
-
-            entity.Property(e => e.Id).HasColumnName("ID");
-            entity.Property(e => e.MoTa).HasMaxLength(255);
-            entity.Property(e => e.TenDanhMuc).HasMaxLength(100);
-            entity.Property(e => e.TrangThai).HasDefaultValue((byte)1);
-        });
-
         modelBuilder.Entity<DonHang>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DonHang__3214EC079C37BFB3");
+            entity.HasKey(e => e.Id).HasName("PK__DonHang__3214EC0711997ECD");
 
             entity.ToTable("DonHang");
 
-            entity.HasIndex(e => e.MaDon, "UQ__DonHang__3D89F56910B3E656").IsUnique();
+            entity.HasIndex(e => e.MaDon, "UQ__DonHang__3D89F5696A0C89E9").IsUnique();
 
             entity.Property(e => e.MaDon)
                 .HasMaxLength(20)
@@ -125,11 +113,11 @@ public partial class ShopAppDbContext : DbContext
 
         modelBuilder.Entity<KhachHang>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__KhachHan__3214EC07495BBA63");
+            entity.HasKey(e => e.Id).HasName("PK__KhachHan__3214EC07A6FF94CB");
 
             entity.ToTable("KhachHang", tb => tb.HasTrigger("trg_LogThemKhach"));
 
-            entity.HasIndex(e => e.Email, "UQ__KhachHan__A9D10534A86384A7").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__KhachHan__A9D10534ADDC8F14").IsUnique();
 
             entity.Property(e => e.DiaChi).HasMaxLength(255);
             entity.Property(e => e.Email)
@@ -137,7 +125,6 @@ public partial class ShopAppDbContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.HoTen).HasMaxLength(100);
             entity.Property(e => e.MatKhau).HasMaxLength(200);
-            entity.Property(e => e.VaiTro).HasMaxLength(30);
             entity.Property(e => e.NgayDangKy)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
@@ -145,11 +132,14 @@ public partial class ShopAppDbContext : DbContext
                 .HasMaxLength(15)
                 .IsUnicode(false)
                 .HasColumnName("SDT");
+            entity.Property(e => e.VaiTro)
+                .HasMaxLength(30)
+                .HasDefaultValue("KhachHang");
         });
 
         modelBuilder.Entity<LichSuThemKhach>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__LichSuTh__3214EC07CEFD4586");
+            entity.HasKey(e => e.Id).HasName("PK__LichSuTh__3214EC07EE230B5A");
 
             entity.ToTable("LichSuThemKhach");
 
@@ -164,11 +154,11 @@ public partial class ShopAppDbContext : DbContext
 
         modelBuilder.Entity<NhanVien>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__NhanVien__3214EC0710F85A17");
+            entity.HasKey(e => e.Id).HasName("PK__NhanVien__3214EC07A4E61B97");
 
             entity.ToTable("NhanVien");
 
-            entity.HasIndex(e => e.Email, "UQ__NhanVien__A9D10534C30E04B9").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__NhanVien__A9D10534F84AB881").IsUnique();
 
             entity.Property(e => e.ChucVu).HasMaxLength(50);
             entity.Property(e => e.Email)
@@ -179,7 +169,7 @@ public partial class ShopAppDbContext : DbContext
 
         modelBuilder.Entity<PhienDangNhap>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__PhienDan__3214EC077175D625");
+            entity.HasKey(e => e.Id).HasName("PK__PhienDan__3214EC07AF3A3EEA");
 
             entity.ToTable("PhienDangNhap");
 
@@ -196,9 +186,19 @@ public partial class ShopAppDbContext : DbContext
                 .HasConstraintName("FK_Phien_KhachHang");
         });
 
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__RefreshT__3214EC0748DF2D52");
+
+            entity.HasIndex(e => e.TokenHash, "IX_RefreshTokens_TokenHash").IsUnique();
+
+            entity.Property(e => e.ThayBangTokenHash).HasMaxLength(200);
+            entity.Property(e => e.TokenHash).HasMaxLength(200);
+        });
+
         modelBuilder.Entity<SanPham>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__SanPham__3214EC0708FEFF56");
+            entity.HasKey(e => e.Id).HasName("PK__SanPham__3214EC078BD60A6C");
 
             entity.ToTable("SanPham", tb => tb.HasTrigger("trg_NganTonKhoAm"));
 

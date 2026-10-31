@@ -39,5 +39,15 @@ namespace ShopApp.Controllers
             vaiTro = User.FindFirstValue(ClaimTypes.Role)
         });
 
+
+        [HttpPost("refresh")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Refresh(RefreshRequestDTO dto)
+        {
+            var kq = await _auth.RefreshAsync(dto.RefreshToken);
+            return kq == null ? Unauthorized() : Ok(kq);
+        }
+
+
     }
 }

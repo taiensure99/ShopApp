@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ShopApp.Interfaces;
 using ShopApp.Models;
@@ -23,8 +24,9 @@ namespace ShopApp.Controllers
             _thongKeService = thongKeService;
         }
 
-        // GET: api/SanPham
+        // GET: api/SanPham  ai cũng truy cập được
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var list = await _sanPhamService.GetAllSanPham();
@@ -105,6 +107,7 @@ namespace ShopApp.Controllers
         //}
 
         [HttpPost]
+        [Authorize(Policy = "NhanVienTroLen")]         // Admin hoặc NhanVien
         public async Task<IActionResult> Create([FromBody] SanPham sanPham) //bắt buộc phải async Task<T> để dùng await
         {
             if (!ModelState.IsValid)
@@ -136,6 +139,7 @@ namespace ShopApp.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "ChiAdmin")]
         public async Task<IActionResult> Delete(int id)
         {
             var kq = await _sanPhamService.DeleteSanPham(id);

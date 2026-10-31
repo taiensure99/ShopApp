@@ -1,4 +1,5 @@
-﻿using ShopApp.Models.DataModels;
+﻿using ShopApp.Models;
+using ShopApp.Models.DataModels;
 
 namespace ShopApp.Interfaces
 {
@@ -6,6 +7,8 @@ namespace ShopApp.Interfaces
     {
         Task<bool> RegisterAsync(RegisterDTO dto);              // false nếu trùng email
         Task<AuthResponseDTO?> LoginAsync(LoginDTO dto);        // null nếu sai thông tin
+        Task<AuthResponseDTO?> RefreshAsync(string tokenGoc);
+
 
     }
 }
